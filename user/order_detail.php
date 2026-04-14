@@ -24,6 +24,11 @@ if (!$detail) {
 
 $order = $detail['order'];
 $items = $detail['items'];
+$paymentLabels = [
+  'momo' => 'MoMo',
+  'vnpay' => 'VNPay',
+  'cod' => 'Thanh toán khi nhận hàng',
+];
 
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
@@ -50,6 +55,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
           <div class="flex-1">
             <div class="font-semibold"><?= e($it['name']) ?></div>
             <div class="text-sm text-gray-600">
+              Size: <?= (int)$it['shoe_size'] ?> •
               SL: <?= (int)$it['quantity'] ?> •
               Đơn giá: <?= number_format((float)$it['unit_price'], 0, ',', '.') ?> VND
             </div>
@@ -64,12 +70,31 @@ require_once __DIR__ . '/../includes/layout/header.php';
 
     <div class="space-y-2 text-sm text-gray-700">
       <div class="flex items-center justify-between">
+        <span>SĐT</span>
+        <span class="font-medium text-gray-900"><?= e((string)($order['buyer_phone'] ?? '')) ?></span>
+      </div>
+      <div class="flex items-start justify-between gap-4">
+        <span>Địa chỉ</span>
+        <span class="font-medium text-gray-900 text-right">
+          <?= e(trim(
+            (string)($order['addr_house'] ?? '') . ', ' .
+            (string)($order['addr_hamlet'] ?? '') . ', ' .
+            (string)($order['addr_commune'] ?? '') . ', ' .
+            (string)($order['addr_province'] ?? '')
+          )) ?>
+        </span>
+      </div>
+      <div class="flex items-center justify-between">
         <span>Ngày tạo</span>
         <span class="font-medium text-gray-900"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></span>
       </div>
       <div class="flex items-center justify-between">
         <span>Trạng thái</span>
         <span class="font-medium text-gray-900"><?= e((string)$order['status']) ?></span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span>Thanh toán</span>
+        <span class="font-medium text-gray-900"><?= e($paymentLabels[(string)($order['payment_method'] ?? '')] ?? (string)($order['payment_method'] ?? '')) ?></span>
       </div>
       <div class="flex items-center justify-between pt-3 border-t">
         <span>Tổng tiền</span>

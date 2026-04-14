@@ -88,10 +88,23 @@ function fetch_products(?int $category_id, string $q, int $offset, int $limit): 
   return $stmt->fetchAll();
 }
 
-function cart_add_item(int $user_id, int $product_id, int $qty): void
+function get_shoe_sizes(): array
+{
+  return [38, 39, 40, 41, 42, 43, 44];
+}
+
+function is_valid_shoe_size(int $size): bool
+{
+  return in_array($size, get_shoe_sizes(), true);
+}
+
+function cart_add_item(int $user_id, int $product_id, int $shoe_size, int $qty): void
 {
   if ($qty <= 0) {
     return;
+  }
+  if (!is_valid_shoe_size($shoe_size)) {
+    throw new RuntimeException('Size giày không hợp lệ.');
   }
 
   // Kiểm tra sản phẩm tồn tại
@@ -100,8 +113,11 @@ function cart_add_item(int $user_id, int $product_id, int $qty): void
     throw new RuntimeException('Sản phẩm không tồn tại.');
   }
 
-  // Update nếu đã có, ngược lại insert mới
-  $existing = getOne('SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? LIMIT 1', [$user_id, $product_id]);
+  // Update nếu đã có cùng product + size, ngược lại insert mới
+  $existing = getOne(
+    'SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND shoe_size = ? LIMIT 1',
+    [$user_id, $product_id, $shoe_size]
+  );
 
   if ($existing) {
     // dùng query trực tiếp để tăng quantity (updateRow không hỗ trợ biểu thức quantity + ?)
@@ -110,6 +126,7 @@ function cart_add_item(int $user_id, int $product_id, int $qty): void
     insertRow('cart', [
       'user_id' => $user_id,
       'product_id' => $product_id,
+      'shoe_size' => $shoe_size,
       'quantity' => $qty,
     ]);
   }
@@ -119,7 +136,9 @@ function cart_get_items(int $user_id): array
 {
   return getAll('
     SELECT
+      c.id AS cart_id,
       c.product_id,
+      c.shoe_size,
       c.quantity,
       p.name,
       p.image_path,
@@ -131,24 +150,30 @@ function cart_get_items(int $user_id): array
   ', [$user_id]);
 }
 
-function cart_update_quantity(int $user_id, int $product_id, int $quantity): void
+function cart_update_item(int $user_id, int $cart_id, int $shoe_size, int $quantity): void
 {
+  if ($cart_id <= 0) {
+    return;
+  }
+  if (!is_valid_shoe_size($shoe_size)) {
+    throw new RuntimeException('Size giày không hợp lệ.');
+  }
   if ($quantity <= 0) {
-    cart_remove_item($user_id, $product_id);
+    cart_remove_item($user_id, $cart_id);
     return;
   }
   getRows(
-    'UPDATE cart SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND product_id = ?',
-    [$quantity, $user_id, $product_id]
+    'UPDATE cart SET shoe_size = ?, quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND id = ?',
+    [$shoe_size, $quantity, $user_id, $cart_id]
   );
 }
 
-function cart_remove_item(int $user_id, int $product_id): void
+function cart_remove_item(int $user_id, int $cart_id): void
 {
-  deleteRow('cart', 'user_id = ? AND product_id = ?', [$user_id, $product_id]);
+  deleteRow('cart', 'user_id = ? AND id = ?', [$user_id, $cart_id]);
 }
 
-function cart_create_order_from_cart(int $user_id): int
+function cart_create_pending_order_from_cart(int $user_id, array $buyer, string $payment_method = 'momo'): int
 {
   $pdo = db();
   $pdo->beginTransaction();
@@ -156,7 +181,7 @@ function cart_create_order_from_cart(int $user_id): int
   try {
     // Lấy cart + thông tin sản phẩm để kiểm tra stock & tính giá
     $stmt = $pdo->prepare('
-      SELECT c.product_id, c.quantity, p.price, p.stock_qty
+      SELECT c.product_id, c.shoe_size, c.quantity, p.price, p.stock_qty
       FROM cart c
       JOIN products p ON p.id = c.product_id
       WHERE c.user_id = ?
@@ -178,34 +203,40 @@ function cart_create_order_from_cart(int $user_id): int
       $total += ((float)$it['price']) * $qty;
     }
 
-    // Tạo order
-    $orderStmt = $pdo->prepare('INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)');
-    $orderStmt->execute([$user_id, $total, 'paid']);
+    // Tạo order ở trạng thái chờ xác nhận từ cổng thanh toán.
+    $orderStmt = $pdo->prepare('
+      INSERT INTO orders (
+        user_id, buyer_phone, addr_house, addr_hamlet, addr_commune, addr_province,
+        payment_method, total_amount, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ');
+    $orderStmt->execute([
+      $user_id,
+      $buyer['buyer_phone'] ?? null,
+      $buyer['addr_house'] ?? null,
+      $buyer['addr_hamlet'] ?? null,
+      $buyer['addr_commune'] ?? null,
+      $buyer['addr_province'] ?? null,
+      $payment_method,
+      $total,
+      'pending',
+    ]);
     $order_id = (int)$pdo->lastInsertId();
 
-    // Tạo order_items + trừ stock
+    // Snapshot order_items để còn đối soát khi MoMo callback về.
     $insertItem = $pdo->prepare('
-      INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-      VALUES (?, ?, ?, ?)
-    ');
-    $updateStock = $pdo->prepare('
-      UPDATE products
-      SET stock_qty = stock_qty - ?
-      WHERE id = ? AND stock_qty >= ?
+      INSERT INTO order_items (order_id, product_id, shoe_size, quantity, unit_price)
+      VALUES (?, ?, ?, ?, ?)
     ');
 
     foreach ($items as $it) {
       $pid = (int)$it['product_id'];
+      $shoeSize = (int)$it['shoe_size'];
       $qty = (int)$it['quantity'];
       $price = (float)$it['price'];
 
-      $insertItem->execute([$order_id, $pid, $qty, $price]);
-      $updateStock->execute([$qty, $pid, $qty]);
+      $insertItem->execute([$order_id, $pid, $shoeSize, $qty, $price]);
     }
-
-    // Xóa cart
-    $del = $pdo->prepare('DELETE FROM cart WHERE user_id = ?');
-    $del->execute([$user_id]);
 
     $pdo->commit();
     return $order_id;
@@ -215,10 +246,230 @@ function cart_create_order_from_cart(int $user_id): int
   }
 }
 
+function cart_create_order_from_cart(int $user_id): int
+{
+  $orderId = cart_create_pending_order_from_cart($user_id, [], 'cod');
+  mark_order_paid($orderId);
+  return $orderId;
+}
+
+function fetch_order_by_id(int $order_id): ?array
+{
+  return getOne('
+    SELECT
+      id, user_id, buyer_phone, addr_house, addr_hamlet, addr_commune, addr_province,
+      payment_method,
+      total_amount, status, created_at
+    FROM orders
+    WHERE id = ?
+    LIMIT 1
+  ', [$order_id]);
+}
+
+function is_valid_payment_method(string $payment_method): bool
+{
+  return in_array($payment_method, ['momo', 'vnpay', 'cod'], true);
+}
+
+function fetch_order_items(int $order_id): array
+{
+  return getAll('
+    SELECT product_id, shoe_size, quantity, unit_price
+    FROM order_items
+    WHERE order_id = ?
+    ORDER BY id ASC
+  ', [$order_id]);
+}
+
+function create_momo_transaction(int $order_id, string $request_id, string $momo_order_id, float $amount, array $response): void
+{
+  insertRow('momo_transactions', [
+    'order_id' => $order_id,
+    'request_id' => $request_id,
+    'momo_order_id' => $momo_order_id,
+    'amount' => $amount,
+    'status' => 'initiated',
+    'pay_url' => (string)($response['payUrl'] ?? ''),
+    'deeplink' => (string)($response['deeplink'] ?? ''),
+    'qr_code_url' => (string)($response['qrCodeUrl'] ?? ''),
+    'last_result_code' => (int)($response['resultCode'] ?? -1),
+    'raw_create_response' => json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+  ]);
+}
+
+function fetch_momo_transaction_by_order_id(int $order_id): ?array
+{
+  return getOne('SELECT * FROM momo_transactions WHERE order_id = ? LIMIT 1', [$order_id]);
+}
+
+function fetch_momo_transaction_by_request_id(string $request_id): ?array
+{
+  return getOne('SELECT * FROM momo_transactions WHERE request_id = ? LIMIT 1', [$request_id]);
+}
+
+function update_momo_transaction_status(int $order_id, string $status, array $payload, ?string $payload_type = null): void
+{
+  $data = [
+    'status' => $status,
+    'trans_id' => isset($payload['transId']) ? (string)$payload['transId'] : null,
+    'pay_type' => isset($payload['payType']) ? (string)$payload['payType'] : null,
+    'last_result_code' => isset($payload['resultCode']) ? (int)$payload['resultCode'] : null,
+  ];
+
+  if ($payload_type === 'return') {
+    $data['raw_return_payload'] = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  }
+  if ($payload_type === 'ipn') {
+    $data['raw_ipn_payload'] = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  }
+
+  updateRow('momo_transactions', $data, 'order_id = :where_order_id', [':where_order_id' => $order_id]);
+}
+
+function finalize_order_inventory(int $order_id, bool $mark_paid): void
+{
+  $pdo = db();
+  $pdo->beginTransaction();
+
+  try {
+    $orderStmt = $pdo->prepare('SELECT id, user_id, status FROM orders WHERE id = ? LIMIT 1 FOR UPDATE');
+    $orderStmt->execute([$order_id]);
+    $order = $orderStmt->fetch();
+    if (!$order) {
+      throw new RuntimeException('Không tìm thấy đơn hàng.');
+    }
+    if ((string)$order['status'] === 'paid') {
+      $pdo->commit();
+      return;
+    }
+    if ((string)$order['status'] === 'cancelled') {
+      throw new RuntimeException('Đơn hàng đã bị huỷ.');
+    }
+
+    $itemsStmt = $pdo->prepare('
+      SELECT oi.product_id, oi.shoe_size, oi.quantity, p.stock_qty
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      WHERE oi.order_id = ?
+      FOR UPDATE
+    ');
+    $itemsStmt->execute([$order_id]);
+    $items = $itemsStmt->fetchAll();
+    if (!$items) {
+      throw new RuntimeException('Đơn hàng chưa có sản phẩm.');
+    }
+
+    foreach ($items as $it) {
+      if ((int)$it['stock_qty'] < (int)$it['quantity']) {
+        throw new RuntimeException('Một số sản phẩm không đủ tồn kho để xác nhận thanh toán.');
+      }
+    }
+
+    $updateStock = $pdo->prepare('UPDATE products SET stock_qty = stock_qty - ? WHERE id = ? AND stock_qty >= ?');
+    foreach ($items as $it) {
+      $qty = (int)$it['quantity'];
+      $pid = (int)$it['product_id'];
+      $updateStock->execute([$qty, $pid, $qty]);
+      if ($updateStock->rowCount() !== 1) {
+        throw new RuntimeException('Không thể cập nhật tồn kho.');
+      }
+    }
+
+    if ($mark_paid) {
+      $paidStmt = $pdo->prepare('UPDATE orders SET status = "paid" WHERE id = ?');
+      $paidStmt->execute([$order_id]);
+    }
+
+    $cartRows = $pdo->prepare('SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND shoe_size = ? LIMIT 1 FOR UPDATE');
+    $deleteCart = $pdo->prepare('DELETE FROM cart WHERE id = ?');
+    $reduceCart = $pdo->prepare('UPDATE cart SET quantity = quantity - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+
+    foreach (fetch_order_items($order_id) as $item) {
+      $cartRows->execute([
+        (int)$order['user_id'],
+        (int)$item['product_id'],
+        (int)$item['shoe_size'],
+      ]);
+      $cartRow = $cartRows->fetch();
+      if (!$cartRow) {
+        continue;
+      }
+      $cartQty = (int)$cartRow['quantity'];
+      $orderQty = (int)$item['quantity'];
+      if ($cartQty <= $orderQty) {
+        $deleteCart->execute([(int)$cartRow['id']]);
+      } else {
+        $reduceCart->execute([$orderQty, (int)$cartRow['id']]);
+      }
+    }
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+  }
+}
+
+function mark_order_paid(int $order_id): void
+{
+  finalize_order_inventory($order_id, true);
+}
+
+function reserve_order_for_cod(int $order_id): void
+{
+  finalize_order_inventory($order_id, false);
+}
+
+function mark_order_cancelled(int $order_id): void
+{
+  $order = fetch_order_by_id($order_id);
+  if (!$order || (string)$order['status'] === 'paid') {
+    return;
+  }
+  updateRow('orders', ['status' => 'cancelled'], 'id = :id', [':id' => $order_id]);
+}
+
+function create_vnpay_transaction(int $order_id, string $txn_ref, float $amount, string $payment_url): void
+{
+  insertRow('vnpay_transactions', [
+    'order_id' => $order_id,
+    'txn_ref' => $txn_ref,
+    'amount' => $amount,
+    'status' => 'initiated',
+    'payment_url' => $payment_url,
+  ]);
+}
+
+function fetch_vnpay_transaction_by_txn_ref(string $txn_ref): ?array
+{
+  return getOne('SELECT * FROM vnpay_transactions WHERE txn_ref = ? LIMIT 1', [$txn_ref]);
+}
+
+function update_vnpay_transaction_status(int $order_id, string $status, array $payload, ?string $payload_type = null): void
+{
+  $data = [
+    'status' => $status,
+    'bank_code' => isset($payload['vnp_BankCode']) ? (string)$payload['vnp_BankCode'] : null,
+    'bank_tran_no' => isset($payload['vnp_BankTranNo']) ? (string)$payload['vnp_BankTranNo'] : null,
+    'transaction_no' => isset($payload['vnp_TransactionNo']) ? (string)$payload['vnp_TransactionNo'] : null,
+    'response_code' => isset($payload['vnp_ResponseCode']) ? (string)$payload['vnp_ResponseCode'] : null,
+    'transaction_status' => isset($payload['vnp_TransactionStatus']) ? (string)$payload['vnp_TransactionStatus'] : null,
+  ];
+
+  if ($payload_type === 'return') {
+    $data['raw_return_payload'] = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  }
+  if ($payload_type === 'ipn') {
+    $data['raw_ipn_payload'] = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  }
+
+  updateRow('vnpay_transactions', $data, 'order_id = :where_order_id', [':where_order_id' => $order_id]);
+}
+
 function fetch_user_orders(int $user_id, int $offset, int $limit): array
 {
   $stmt = db()->prepare('
-    SELECT id, total_amount, status, created_at
+    SELECT id, total_amount, status, payment_method, created_at
     FROM orders
     WHERE user_id = ?
     ORDER BY created_at DESC
@@ -243,7 +494,10 @@ function count_user_orders(int $user_id): int
 function fetch_order_detail_for_user(int $order_id, int $user_id): ?array
 {
   $stmt = db()->prepare('
-    SELECT id, user_id, total_amount, status, created_at
+    SELECT
+      id, user_id, buyer_phone, addr_house, addr_hamlet, addr_commune, addr_province,
+      payment_method,
+      total_amount, status, created_at
     FROM orders
     WHERE id = ? AND user_id = ?
     LIMIT 1
@@ -257,6 +511,7 @@ function fetch_order_detail_for_user(int $order_id, int $user_id): ?array
   $items = db()->prepare('
     SELECT
       oi.product_id,
+      oi.shoe_size,
       oi.quantity,
       oi.unit_price,
       p.name,
@@ -551,6 +806,12 @@ function admin_fetch_order_detail(int $order_id): ?array
     SELECT
       o.id,
       o.user_id,
+      o.buyer_phone,
+      o.addr_house,
+      o.addr_hamlet,
+      o.addr_commune,
+      o.addr_province,
+      o.payment_method,
       o.total_amount,
       o.status,
       o.created_at,
@@ -570,6 +831,7 @@ function admin_fetch_order_detail(int $order_id): ?array
   $itemsStmt = db()->prepare('
     SELECT
       oi.product_id,
+      oi.shoe_size,
       oi.quantity,
       oi.unit_price,
       p.name AS product_name,

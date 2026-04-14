@@ -46,12 +46,25 @@ require_once __DIR__ . '/../includes/layout/header.php';
           <div class="flex-1">
             <div class="font-semibold"><?= e($it['name']) ?></div>
             <div class="text-sm text-gray-600 mt-1">Đơn giá: <span class="font-medium"><?= number_format((float)$it['price'], 0, ',', '.') ?> VND</span></div>
-            <div class="text-xs text-gray-500 mt-1">Còn lại: <?= (int)$it['stock_qty'] ?></div>
+            <div class="text-xs text-gray-500 mt-1">Size: <?= (int)$it['shoe_size'] ?> • Còn lại: <?= (int)$it['stock_qty'] ?></div>
           </div>
 
           <div class="w-full md:w-64 flex items-end justify-between gap-3">
             <form method="POST" action="<?= e(app_url('user/cart_update.php')) ?>" class="flex items-end gap-2">
-              <input type="hidden" name="product_id" value="<?= (int)$it['product_id'] ?>">
+              <input type="hidden" name="cart_id" value="<?= (int)$it['cart_id'] ?>">
+              <div>
+                <label class="text-xs text-gray-600">Size</label>
+                <select
+                  name="shoe_size"
+                  class="w-20 border border-gray-200 rounded px-2 py-1 bg-white"
+                >
+                  <?php foreach (get_shoe_sizes() as $size): ?>
+                    <option value="<?= (int)$size ?>" <?= ((int)$size === (int)$it['shoe_size']) ? 'selected' : '' ?>>
+                      <?= (int)$size ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
               <div>
                 <label class="text-xs text-gray-600">SL</label>
                 <input
@@ -69,7 +82,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
             </form>
 
             <form method="POST" action="<?= e(app_url('user/cart_remove.php')) ?>">
-              <input type="hidden" name="product_id" value="<?= (int)$it['product_id'] ?>">
+              <input type="hidden" name="cart_id" value="<?= (int)$it['cart_id'] ?>">
               <button class="px-3 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm" type="submit">
                 Xoá
               </button>

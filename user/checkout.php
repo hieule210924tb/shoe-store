@@ -7,10 +7,18 @@ require_once __DIR__ . '/../includes/auth.php';
 
 require_login();
 
-$pageTitle = 'Thanh toán MoMo (demo)';
+$pageTitle = 'Thanh toán';
 
 $uid = current_user_id();
 $items = cart_get_items($uid);
+
+$old = $_SESSION['checkout_buyer'] ?? [];
+$old_phone = is_array($old) ? (string)($old['buyer_phone'] ?? '') : '';
+$old_house = is_array($old) ? (string)($old['addr_house'] ?? '') : '';
+$old_hamlet = is_array($old) ? (string)($old['addr_hamlet'] ?? '') : '';
+$old_commune = is_array($old) ? (string)($old['addr_commune'] ?? '') : '';
+$old_province = is_array($old) ? (string)($old['addr_province'] ?? '') : '';
+$old_payment_method = is_array($old) ? (string)($old['payment_method'] ?? 'momo') : 'momo';
 
 $total = 0.0;
 foreach ($items as $it) {
@@ -22,219 +30,173 @@ if (!$items) {
   redirect('user/cart.php');
 }
 
-// Tạo mã tham chiếu + thời gian hết hạn hiển thị (demo).
-// (Logic trừ kho/tạo order thật vẫn diễn ra ở checkout_confirm.php)
-$requestId = 'ORD' . date('Ymd') . strtoupper(substr(sha1((string)$uid . microtime(true)), 0, 8));
-$expireSeconds = 14 * 60 + 51; // hiển thị giống ảnh demo: 14 phút 51 giây
-$_SESSION['checkout_ref'] = $requestId;
-$_SESSION['checkout_expire_at'] = time() + $expireSeconds;
-
-// QR demo: dữ liệu mô phỏng.
-// Vì đây là "giả lập", không tích hợp MoMo API thật nên ứng dụng MoMo có thể không xử lý được,
-// nhưng QR vẫn phải "quét đọc" được (demo luồng bằng nút "Tôi đã thanh toán").
-$qrData = sprintf('momo://pay?amount=%0.2f&ref=%s&user=%d', $total, $requestId, $uid);
-
-$expiredAt = $_SESSION['checkout_expire_at'];
-$startMin = intdiv($expireSeconds, 60);
-$startSec = $expireSeconds % 60;
-
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<div class="mt-2 flex items-center justify-center">
-  <div class="w-full max-w-4xl">
-    <!-- Top bar MoMo (demo) -->
-    <div class="flex items-center justify-center gap-3 mb-6 text-xs text-gray-700">
-      <div class="w-10 h-10 rounded bg-fuchsia-700 flex items-center justify-center text-white font-bold tracking-wide">
-        momo
+<div class="mx-auto mt-4 max-w-4xl">
+  <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+    <div class="rounded-xl border bg-white p-5 shadow-sm">
+      <div class="mb-4 flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded bg-fuchsia-700 text-sm font-bold uppercase tracking-wide text-white">
+          MoMo
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold text-gray-900">Chọn phương thức thanh toán</h1>
+          <p class="text-sm text-gray-500">Hỗ trợ MoMo sandbox, VNPay sandbox và thanh toán khi nhận hàng.</p>
+        </div>
       </div>
-      <div class="leading-tight">
-        <div class="font-semibold text-gray-800">Cổng thanh toán MoMo</div>
-        <div class="text-gray-500">Demo thanh toán QR</div>
+
+      <div class="space-y-3">
+        <?php foreach ($items as $it): ?>
+          <div class="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0">
+            <div>
+              <div class="font-medium text-gray-900"><?= e($it['name']) ?></div>
+              <div class="text-sm text-gray-500">Size <?= (int)$it['shoe_size'] ?> • SL <?= (int)$it['quantity'] ?></div>
+            </div>
+            <div class="text-sm font-semibold text-gray-900">
+              <?= number_format(((float)$it['price']) * (int)$it['quantity'], 0, ',', '.') ?> VND
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+      <div class="mt-5 flex items-center justify-between border-t pt-4">
+        <span class="text-gray-600">Tổng thanh toán</span>
+        <span class="text-2xl font-bold text-fuchsia-700"><?= number_format((float)$total, 0, ',', '.') ?> VND</span>
+      </div>
+
+      <form method="POST" action="<?= e(app_url('user/checkout_confirm.php')) ?>" class="mt-5 space-y-3">
+        <div class="rounded-lg border bg-gray-50 p-4">
+          <div class="mb-3 text-sm font-semibold text-gray-900">Thông tin người mua</div>
+
+          <div class="grid grid-cols-1 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-700">Số điện thoại</label>
+              <input
+                name="buyer_phone"
+                value="<?= e($old_phone) ?>"
+                required
+                inputmode="tel"
+                class="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm"
+                placeholder="VD: 09xxxxxxxx"
+              >
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-700">Số nhà</label>
+                <input
+                  name="addr_house"
+                  value="<?= e($old_house) ?>"
+                  required
+                  class="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm"
+                  placeholder="VD: 12A"
+                >
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700">Thôn</label>
+                <input
+                  name="addr_hamlet"
+                  value="<?= e($old_hamlet) ?>"
+                  required
+                  class="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm"
+                  placeholder="VD: Thôn 3"
+                >
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-700">Xã</label>
+                <input
+                  name="addr_commune"
+                  value="<?= e($old_commune) ?>"
+                  required
+                  class="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm"
+                  placeholder="VD: Xã ABC"
+                >
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700">Tỉnh</label>
+                <input
+                  name="addr_province"
+                  value="<?= e($old_province) ?>"
+                  required
+                  class="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm"
+                  placeholder="VD: Hà Nội"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-gray-50 p-4">
+          <div class="mb-3 text-sm font-semibold text-gray-900">Phương thức thanh toán</div>
+          <div class="space-y-2 text-sm text-gray-700">
+            <label class="flex cursor-pointer items-start gap-3 rounded border bg-white p-3">
+              <input type="radio" name="payment_method" value="momo" <?= $old_payment_method === 'momo' ? 'checked' : '' ?>>
+              <span>
+                <span class="block font-medium text-gray-900">MoMo sandbox</span>
+                <span class="block text-gray-500">Chuyển sang cổng MoMo test để thanh toán.</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-3 rounded border bg-white p-3">
+              <input type="radio" name="payment_method" value="vnpay" <?= $old_payment_method === 'vnpay' ? 'checked' : '' ?>>
+              <span>
+                <span class="block font-medium text-gray-900">VNPay sandbox</span>
+                <span class="block text-gray-500">Chuyển sang cổng VNPay test để thanh toán.</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-3 rounded border bg-white p-3">
+              <input type="radio" name="payment_method" value="cod" <?= $old_payment_method === 'cod' ? 'checked' : '' ?>>
+              <span>
+                <span class="block font-medium text-gray-900">Thanh toán khi nhận hàng</span>
+                <span class="block text-gray-500">Tạo đơn ngay, trạng thái thanh toán sẽ để chờ xử lý.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full rounded-lg bg-fuchsia-700 px-4 py-3 font-medium text-white hover:bg-fuchsia-800">
+          Tiếp tục thanh toán
+        </button>
+      </form>
+
+      <div class="mt-3 text-center">
+        <a href="<?= e(app_url('user/cart.php')) ?>" class="text-sm text-fuchsia-700 hover:underline">Quay lại giỏ hàng</a>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
-      <!-- Left panel: thông tin đơn -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 md:p-5">
-        <h2 class="text-sm font-semibold text-gray-900 mb-2">Thông tin đơn hàng</h2>
-
-        <div class="space-y-1 text-[13px] text-gray-600">
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">Nhà cung cấp</span>
-            <span class="text-gray-800 font-medium">ShoeStore</span>
-          </div>
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">Tên doanh nghiệp</span>
-            <span class="text-gray-800 font-medium">ShoeStore Demo</span>
-          </div>
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">SDK</span>
-            <span class="text-gray-800 font-medium">SDK4ME</span>
-          </div>
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">Mã đơn hàng</span>
-            <span class="text-gray-800 font-medium break-all text-right"><?= e($requestId) ?></span>
-          </div>
+    <div class="rounded-xl border border-fuchsia-100 bg-fuchsia-50 p-5">
+      <h2 class="text-base font-semibold text-fuchsia-900">Thông tin cổng test</h2>
+      <div class="mt-4 space-y-3 text-sm text-fuchsia-900">
+        <div class="rounded-lg bg-white p-3">
+          <div class="text-xs uppercase text-fuchsia-600">MoMo partner code</div>
+          <div class="mt-1 break-all font-medium"><?= e(MOMO_PARTNER_CODE) ?></div>
         </div>
-
-        <div class="mt-3 border-t pt-3 space-y-1 text-[13px] text-gray-600">
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">Mô tả</span>
-            <span class="text-gray-800 font-medium text-right">Thanh toán đơn hàng</span>
-          </div>
-          <div class="flex justify-between gap-3">
-            <span class="text-gray-500">Số tiền</span>
-            <span class="text-gray-900 font-bold text-right">
-              <?= number_format((float)$total, 0, ',', '.') ?>đ
-            </span>
-          </div>
+        <div class="rounded-lg bg-white p-3">
+          <div class="text-xs uppercase text-fuchsia-600">MoMo redirect URL</div>
+          <div class="mt-1 break-all font-medium"><?= e(MOMO_REDIRECT_URL) ?></div>
         </div>
-
-        <!-- Expire box -->
-        <div class="mt-4 bg-pink-50 border border-pink-100 rounded-lg p-3">
-          <div class="text-xs text-pink-700 font-medium">
-            Đơn hàng sẽ hết hạn sau:
-          </div>
-          <div class="mt-2 flex gap-3 items-center">
-            <div class="flex-1">
-              <div class="text-center bg-white border border-pink-200 rounded-lg py-2">
-                <div class="text-xl font-bold text-fuchsia-700 leading-none">
-                  <span id="remain_min"><?= (int)$startMin ?></span>
-                </div>
-                <div class="text-[10px] text-gray-500">phút</div>
-              </div>
-            </div>
-            <div class="flex-1">
-              <div class="text-center bg-white border border-pink-200 rounded-lg py-2">
-                <div class="text-xl font-bold text-fuchsia-700 leading-none">
-                  <span id="remain_sec"><?= (int)$startSec ?></span>
-                </div>
-                <div class="text-[10px] text-gray-500">giây</div>
-              </div>
-            </div>
-          </div>
+        <div class="rounded-lg bg-white p-3">
+          <div class="text-xs uppercase text-fuchsia-600">VNPay return URL</div>
+          <div class="mt-1 break-all font-medium"><?= e(VNPAY_RETURN_URL) ?></div>
         </div>
-
-        <!-- Button confirm -->
-        <form method="POST" action="<?= e(app_url('user/checkout_confirm.php')) ?>" class="mt-4">
-          <button
-            type="submit"
-            class="w-full bg-fuchsia-700 text-white rounded-lg px-4 py-2 hover:bg-fuchsia-800"
-          >
-            Tôi đã thanh toán
-          </button>
-        </form>
-
-        <div class="mt-3 text-center">
-          <a href="<?= e(app_url('user/cart.php')) ?>"
-             class="text-xs text-fuchsia-700 hover:underline">
-            Quay về
-          </a>
+        <div class="rounded-lg bg-white p-3">
+          <div class="text-xs uppercase text-fuchsia-600">VNPay IPN URL</div>
+          <div class="mt-1 break-all font-medium"><?= e(VNPAY_IPN_URL) ?></div>
+        </div>
+        <div class="rounded-lg bg-white p-3">
+          <div class="text-xs uppercase text-fuchsia-600">MoMo IPN URL</div>
+          <div class="mt-1 break-all font-medium"><?= e(MOMO_IPN_URL) ?></div>
         </div>
       </div>
-
-      <!-- Right panel: QR -->
-      <div class="rounded-xl overflow-hidden shadow-sm border border-fuchsia-200">
-        <div class="bg-gradient-to-b from-fuchsia-700 to-pink-700 p-5 md:p-6 text-white">
-          <div class="flex items-start justify-center">
-            <div class="bg-white/15 rounded-xl px-4 py-2 text-center text-[12px] leading-tight w-full max-w-[340px]">
-              <div class="flex justify-center items-center gap-2">
-                <span class="text-xl">😊</span>
-                <span class="font-semibold">Tích huỷ đủ yêu cầu thế giới</span>
-              </div>
-              <div class="mt-1 text-white/90 text-[11px]">
-                Nhấn nút bên trái để hoàn tất (demo)
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 bg-white rounded-2xl p-4 flex items-center justify-center">
-            <div class="relative">
-              <!-- QR生成 ngay ở client -->
-              <div id="qrcode" class="w-64 h-64 flex items-center justify-center"></div>
-            </div>
-          </div>
-
-          <div class="mt-3 text-center text-xs text-white/90">
-            Sử dụng App MoMo quét QR để thanh toán đơn hàng
-          </div>
-          <div class="mt-1 text-center text-[11px] text-white/70">
-            Gõ khăn khi thanh toán. Xác nhận: "Tôi đã thanh toán"
-          </div>
-        </div>
-      </div>
+      <p class="mt-4 text-sm text-fuchsia-800">
+        Nếu MoMo sandbox không gọi được `IPN URL` từ internet, đơn vẫn có thể được cập nhật khi người dùng quay lại `returnUrl`.
+      </p>
     </div>
   </div>
 </div>
-
-<!-- QR code generator (tạo QR client-side, tránh phụ thuộc API ngoài) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>
-  (function () {
-    var end = <?= (int)$expiredAt ?> * 1000;
-    var minEl = document.getElementById('remain_min');
-    var secEl = document.getElementById('remain_sec');
-    if (!minEl || !secEl) return;
-
-    function pad2(n) { return String(n).padStart(2, '0'); }
-
-    function tick() {
-      var now = Date.now();
-      var diff = Math.max(0, end - now);
-      var totalSec = Math.floor(diff / 1000);
-      var m = Math.floor(totalSec / 60);
-      var s = totalSec % 60;
-      minEl.textContent = String(m);
-      secEl.textContent = pad2(s);
-      if (diff <= 0) {
-        clearInterval(timer);
-      }
-    }
-
-    tick();
-    var timer = setInterval(tick, 1000);
-  })();
-
-  // Render QR sau khi DOM sẵn sàng
-  (function () {
-    var el = document.getElementById('qrcode');
-    if (!el || typeof QRCode === 'undefined') return;
-    var qrText = <?= json_encode($qrData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-
-    el.innerHTML = '';
-    // QRCode.js tự tạo canvas hoặc table bên trong container
-    new QRCode(el, {
-      text: qrText,
-      width: 256,
-      height: 256,
-      // Tăng mức sửa lỗi để vẫn quét được dù có badge đè giữa (demo giống MoMo)
-      correctLevel: QRCode.CorrectLevel.H
-    });
-
-    // Badge "momo" đè lên giữa (demo)
-    var badge = document.createElement('div');
-    badge.className = 'absolute flex items-center justify-center';
-    badge.style.left = '50%';
-    badge.style.top = '50%';
-    badge.style.transform = 'translate(-50%, -50%)';
-    badge.style.width = '34px';
-    badge.style.height = '34px';
-    badge.style.borderRadius = '9999px';
-    badge.style.background = '#c026d3';
-    badge.style.color = '#fff';
-    badge.style.fontSize = '10px';
-    badge.style.fontWeight = '700';
-    badge.style.display = 'flex';
-    badge.style.alignItems = 'center';
-    badge.style.justifyContent = 'center';
-    badge.style.pointerEvents = 'none';
-    badge.textContent = 'momo';
-    // container #qrcode đang là flex; ta thêm badge vào parent tương đối
-    el.style.position = 'relative';
-    el.appendChild(badge);
-  })();
-</script>
 
 <?php require_once __DIR__ . '/../includes/layout/footer.php'; ?>
 

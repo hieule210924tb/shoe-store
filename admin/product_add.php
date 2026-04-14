@@ -116,51 +116,51 @@ require_once __DIR__ . '/includes/layout_start.php';
   <a href="<?= e(route_url('admin', 'products')) ?>" class="btn btn-outline-secondary btn-sm">← Quay lại danh sách</a>
 </div>
 
-<div class="mt-6 bg-white border rounded-lg p-4 md:p-6">
-  <form method="POST" enctype="multipart/form-data" class="space-y-4">
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Danh mục</label>
-      <select name="category_id" class="w-full border border-gray-200 rounded px-3 py-2" required>
-        <option value="">-- Chọn danh mục --</option>
-        <?php foreach ($categories as $c): ?>
-          <option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?></option>
-        <?php endforeach; ?>
-      </select>
-      <?php if (!$categories): ?>
-        <div class="text-xs text-red-600 mt-2">Bạn chưa có danh mục. Vào `admin/categories.php` để thêm trước.</div>
-      <?php endif; ?>
-    </div>
-
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Tên sản phẩm</label>
-      <input name="name" class="w-full border border-gray-200 rounded px-3 py-2" required>
-    </div>
-
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Mô tả</label>
-      <textarea name="description" rows="4" class="w-full border border-gray-200 rounded px-3 py-2" placeholder="Mô tả ngắn..."></textarea>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm text-gray-700 mb-1">Giá (VND)</label>
-        <input name="price" type="number" min="0" class="w-full border border-gray-200 rounded px-3 py-2" required value="0">
+<div class="card card-outline card-secondary">
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="category_id">Danh mục</label>
+        <select name="category_id" id="category_id" class="form-control" required>
+          <option value="">-- Chọn danh mục --</option>
+          <?php foreach ($categories as $c): ?>
+            <option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <?php if (!$categories): ?>
+          <small class="form-text text-danger">Chưa có danh mục. Vào <a href="<?= e(route_url('admin', 'categories')) ?>">Danh mục</a> để thêm trước.</small>
+        <?php endif; ?>
       </div>
-      <div>
-        <label class="block text-sm text-gray-700 mb-1">Tồn kho</label>
-        <input name="stock_qty" type="number" min="0" class="w-full border border-gray-200 rounded px-3 py-2" required value="0">
+
+      <div class="form-group">
+        <label for="product-name">Tên sản phẩm</label>
+        <input name="name" id="product-name" type="text" class="form-control" required>
       </div>
-    </div>
 
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Upload ảnh (JPG/PNG/WEBP, <=2MB)</label>
-      <input type="file" name="image" accept="image/*" class="w-full">
-    </div>
+      <div class="form-group">
+        <label for="product-description">Mô tả</label>
+        <textarea name="description" id="product-description" rows="4" class="form-control" placeholder="Mô tả ngắn..."></textarea>
+      </div>
 
-    <button type="submit" class="w-full bg-blue-700 text-white rounded px-4 py-3 hover:bg-blue-800">
-      Lưu sản phẩm
-    </button>
-  </form>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="product-price">Giá (VND)</label>
+          <input name="price" id="product-price" type="number" min="0" class="form-control" required value="0">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="product-stock">Tồn kho</label>
+          <input name="stock_qty" id="product-stock" type="number" min="0" class="form-control" required value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="product-image">Upload ảnh (JPG/PNG/WEBP, tối đa 2MB, tuỳ chọn)</label>
+        <input type="file" name="image" id="product-image" accept="image/*" class="form-control-file">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Lưu sản phẩm</button>
+    </form>
+  </div>
 </div>
 
 <?php require_once __DIR__ . '/includes/layout_end.php'; ?>

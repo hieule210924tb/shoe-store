@@ -22,6 +22,11 @@ if ($total_pages > 0 && $page > $total_pages) {
 $offset = ($page - 1) * $per_page;
 
 $orders = fetch_user_orders($uid, $offset, $per_page);
+$paymentLabels = [
+  'momo' => 'MoMo',
+  'vnpay' => 'VNPay',
+  'cod' => 'COD',
+];
 
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
@@ -43,6 +48,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
           <div class="text-sm text-gray-600">
             Mã đơn: <span class="font-medium text-gray-900">#<?= (int)$o['id'] ?></span>
             • <?= e(date('d/m/Y H:i', strtotime((string)$o['created_at']))) ?>
+            • <?= e($paymentLabels[(string)($o['payment_method'] ?? '')] ?? (string)($o['payment_method'] ?? '')) ?>
           </div>
           <div class="flex items-center justify-between gap-3">
             <div class="font-bold">

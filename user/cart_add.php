@@ -9,6 +9,7 @@ require_login();
 
 $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
 $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+$shoe_size = isset($_POST['shoe_size']) ? (int)$_POST['shoe_size'] : 40;
 
 if ($product_id <= 0) {
   set_flash('error', 'Sản phẩm không hợp lệ.');
@@ -16,6 +17,10 @@ if ($product_id <= 0) {
 }
 
 $quantity = max(1, $quantity);
+if (!is_valid_shoe_size($shoe_size)) {
+  set_flash('error', 'Size giày không hợp lệ.');
+  redirect('user/product_detail.php?id=' . $product_id);
+}
 
 $uid = current_user_id();
 if (!$uid) {
@@ -36,8 +41,11 @@ if ($stock <= 0) {
   redirect('user/product_detail.php?id=' . $product_id);
 }
 
-// Lấy số lượng hiện tại trong cart
-$curRow = getOne('SELECT quantity FROM cart WHERE user_id = ? AND product_id = ? LIMIT 1', [$uid, $product_id]);
+// Lấy số lượng hiện tại trong cart theo cùng size
+$curRow = getOne(
+  'SELECT quantity FROM cart WHERE user_id = ? AND product_id = ? AND shoe_size = ? LIMIT 1',
+  [$uid, $product_id, $shoe_size]
+);
 $curQty = $curRow ? (int)$curRow['quantity'] : 0;
 
 $toAdd = $quantity;
@@ -50,7 +58,7 @@ if ($toAdd <= 0) {
   redirect('user/cart.php');
 }
 
-cart_add_item($uid, $product_id, $toAdd);
+cart_add_item($uid, $product_id, $shoe_size, $toAdd);
 set_flash('success', 'Đã thêm vào giỏ hàng.');
 redirect('user/cart.php');
 

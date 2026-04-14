@@ -52,6 +52,21 @@ require_once __DIR__ . '/../includes/layout/header.php';
       <div class="mt-6 border-t pt-4">
         <form method="POST" action="<?= e(app_url('user/cart_add.php')) ?>" class="flex gap-3 items-end">
           <input type="hidden" name="product_id" value="<?= (int)$product['id'] ?>">
+          <div class="flex flex-col">
+            <label class="text-sm text-gray-700 mb-1">Size</label>
+            <select
+              name="shoe_size"
+              class="w-28 border border-gray-200 rounded px-3 py-2 bg-white"
+              required
+              <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>
+            >
+              <?php foreach (get_shoe_sizes() as $size): ?>
+                <option value="<?= (int)$size ?>" <?= ((int)$size === 40) ? 'selected' : '' ?>>
+                  <?= (int)$size ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
 
           <div class="flex flex-col">
             <label class="text-sm text-gray-700 mb-1">Số lượng</label>

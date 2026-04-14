@@ -23,6 +23,11 @@ if (!$detail) {
 
 $order = $detail['order'];
 $items = $detail['items'];
+$paymentLabels = [
+  'momo' => 'MoMo',
+  'vnpay' => 'VNPay',
+  'cod' => 'Thanh toán khi nhận hàng',
+];
 
 $stats = admin_stats();
 $adminActive = 'orders';
@@ -41,55 +46,92 @@ require_once __DIR__ . '/includes/layout_start.php';
   <a href="<?= e(route_url('admin', 'orders')) ?>" class="btn btn-outline-secondary btn-sm">← Quay lại danh sách</a>
 </div>
 
-<div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div class="bg-white border rounded-lg p-4 md:col-span-1">
-    <div class="text-sm text-gray-600">Khách hàng</div>
-    <div class="mt-2 font-semibold"><?= e($order['user_name'] ?? '') ?></div>
-    <div class="text-sm text-gray-500 mt-1"><?= e($order['user_email'] ?? '') ?></div>
+<div class="row">
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card card-outline card-secondary h-100">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Khách hàng</div>
+        <div class="mt-2 font-weight-bold"><?= e($order['user_name'] ?? '') ?></div>
+        <div class="small text-muted mt-1"><?= e($order['user_email'] ?? '') ?></div>
+        <?php if (!empty($order['buyer_phone'])): ?>
+          <div class="small text-muted mt-1">SĐT: <?= e((string)$order['buyer_phone']) ?></div>
+        <?php endif; ?>
+        <?php
+          $addr = trim(
+            (string)($order['addr_house'] ?? '') . ', ' .
+            (string)($order['addr_hamlet'] ?? '') . ', ' .
+            (string)($order['addr_commune'] ?? '') . ', ' .
+            (string)($order['addr_province'] ?? '')
+          );
+        ?>
+        <?php if ($addr !== ', , ,'): ?>
+          <div class="small text-muted mt-1">Đ/c: <?= e($addr) ?></div>
+        <?php endif; ?>
+      </div>
+    </div>
   </div>
 
-  <div class="bg-white border rounded-lg p-4 md:col-span-1">
-    <div class="text-sm text-gray-600">Trạng thái</div>
-    <?php
-      $st = (string)($order['status'] ?? '');
-      $badge = 'bg-gray-100 text-gray-700 border-gray-200';
-      if ($st === 'paid') $badge = 'bg-green-50 text-green-800 border-green-200';
-      if ($st === 'pending') $badge = 'bg-yellow-50 text-yellow-800 border-yellow-200';
-      if ($st === 'cancelled') $badge = 'bg-red-50 text-red-800 border-red-200';
-    ?>
-    <div class="mt-3">
-      <span class="inline-flex items-center px-3 py-1 rounded border text-sm <?= $badge ?>">
-        <?= e($st) ?>
-      </span>
-    </div>
-    <div class="text-sm text-gray-500 mt-3">
-      Ngày tạo: <?= e(date('d/m/Y H:i', strtotime((string)$order['created_at'])) ) ?>
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card card-outline card-secondary h-100">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Trạng thái</div>
+        <?php
+          $st = (string)($order['status'] ?? '');
+          $badgeClass = 'badge-secondary';
+          if ($st === 'paid') {
+            $badgeClass = 'badge-success';
+          }
+          if ($st === 'pending') {
+            $badgeClass = 'badge-warning';
+          }
+          if ($st === 'cancelled') {
+            $badgeClass = 'badge-danger';
+          }
+        ?>
+        <div class="mt-3">
+          <span class="badge <?= e($badgeClass) ?> badge-pill px-3 py-2"><?= e($st) ?></span>
+        </div>
+        <div class="small text-muted mt-2">
+          Thanh toán: <?= e($paymentLabels[(string)($order['payment_method'] ?? '')] ?? (string)($order['payment_method'] ?? '')) ?>
+        </div>
+        <div class="small text-muted mt-3 mb-0">
+          Ngày tạo: <?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="bg-white border rounded-lg p-4 md:col-span-1">
-    <div class="text-sm text-gray-600">Tổng tiền</div>
-    <div class="text-3xl font-bold text-gray-900 mt-2">
-      <?= number_format((float)$order['total_amount'], 0, ',', '.') ?> VND
+  <div class="col-md-4">
+    <div class="card card-outline card-primary h-100">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Tổng tiền</div>
+        <div class="h3 font-weight-bold text-dark mb-0 mt-2">
+          <?= number_format((float)$order['total_amount'], 0, ',', '.') ?> VND
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="mt-6 bg-white border rounded-lg overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="bg-gray-50 text-gray-600 border-b">
+<div class="card mt-3">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Sản phẩm trong đơn</h3>
+  </div>
+  <div class="card-body table-responsive p-0">
+    <table class="table table-hover table-striped mb-0">
+      <thead>
         <tr>
-          <th class="py-3 px-3 text-left">Sản phẩm</th>
-          <th class="py-3 px-3 text-left">SL</th>
-          <th class="py-3 px-3 text-left">Đơn giá</th>
-          <th class="py-3 px-3 text-left">Thành tiền</th>
+          <th>Sản phẩm</th>
+          <th class="text-nowrap" style="width: 90px;">Size</th>
+          <th class="text-nowrap" style="width: 80px;">SL</th>
+          <th class="text-nowrap">Đơn giá</th>
+          <th class="text-nowrap">Thành tiền</th>
         </tr>
       </thead>
       <tbody>
         <?php if (!$items): ?>
           <tr>
-            <td colspan="4" class="py-6 text-center text-gray-600">
+            <td colspan="5" class="text-center text-muted py-4">
               Đơn hàng này chưa có item.
             </td>
           </tr>
@@ -98,23 +140,26 @@ require_once __DIR__ . '/includes/layout_start.php';
             <?php $qty = (int)($it['quantity'] ?? 0); ?>
             <?php $unit = (float)($it['unit_price'] ?? 0); ?>
             <?php $lineTotal = $unit * $qty; ?>
-            <tr class="border-b last:border-b-0">
-              <td class="py-3 px-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-14 h-10 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="mr-3 bg-light rounded overflow-hidden d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 40px;">
                     <?php if (!empty($it['image_path'])): ?>
-                      <img src="<?= e(app_url($it['image_path'])) ?>" alt="<?= e($it['product_name'] ?? '') ?>" class="w-full h-full object-cover">
+                      <img src="<?= e(app_url($it['image_path'])) ?>" alt="<?= e($it['product_name'] ?? '') ?>" class="img-fluid" style="max-height: 40px; object-fit: cover; width: 100%;">
+                    <?php else: ?>
+                      <i class="fas fa-image text-muted"></i>
                     <?php endif; ?>
                   </div>
                   <div>
-                    <div class="font-medium"><?= e($it['product_name'] ?? '') ?></div>
-                    <div class="text-xs text-gray-500">ID: <?= (int)($it['product_id'] ?? 0) ?></div>
+                    <div class="font-weight-medium"><?= e($it['product_name'] ?? '') ?></div>
+                    <div class="small text-muted">ID: <?= (int)($it['product_id'] ?? 0) ?></div>
                   </div>
                 </div>
               </td>
-              <td class="py-3 px-3"><?= $qty ?></td>
-              <td class="py-3 px-3 font-medium"><?= number_format($unit, 0, ',', '.') ?> VND</td>
-              <td class="py-3 px-3 font-bold"><?= number_format($lineTotal, 0, ',', '.') ?> VND</td>
+              <td><?= (int)($it['shoe_size'] ?? 0) ?></td>
+              <td><?= $qty ?></td>
+              <td class="font-weight-medium"><?= number_format($unit, 0, ',', '.') ?> VND</td>
+              <td class="font-weight-bold"><?= number_format($lineTotal, 0, ',', '.') ?> VND</td>
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -124,4 +169,3 @@ require_once __DIR__ . '/includes/layout_start.php';
 </div>
 
 <?php require_once __DIR__ . '/includes/layout_end.php'; ?>
-

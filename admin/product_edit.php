@@ -120,59 +120,62 @@ require_once __DIR__ . '/includes/layout_start.php';
   <a href="<?= e(route_url('admin', 'products')) ?>" class="btn btn-outline-secondary btn-sm">← Quay lại danh sách</a>
 </div>
 
-<div class="mt-6 bg-white border rounded-lg p-4 md:p-6">
-  <form method="POST" enctype="multipart/form-data" class="space-y-4">
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Danh mục</label>
-      <select name="category_id" class="w-full border border-gray-200 rounded px-3 py-2" required>
-        <option value="">-- Chọn danh mục --</option>
-        <?php foreach ($categories as $c): ?>
-          <?php $selected = ((int)$c['id'] === (int)$product['category_id']); ?>
-          <option value="<?= (int)$c['id'] ?>" <?= $selected ? 'selected' : '' ?>>
-            <?= e($c['name']) ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Tên sản phẩm</label>
-      <input name="name" class="w-full border border-gray-200 rounded px-3 py-2" required value="<?= e($product['name'] ?? '') ?>">
-    </div>
-
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Mô tả</label>
-      <textarea name="description" rows="4" class="w-full border border-gray-200 rounded px-3 py-2"><?= e($product['description'] ?? '') ?></textarea>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm text-gray-700 mb-1">Giá (VND)</label>
-        <input name="price" type="number" min="0" class="w-full border border-gray-200 rounded px-3 py-2" required value="<?= (int)($product['price'] ?? 0) ?>">
-      </div>
-      <div>
-        <label class="block text-sm text-gray-700 mb-1">Tồn kho</label>
-        <input name="stock_qty" type="number" min="0" class="w-full border border-gray-200 rounded px-3 py-2" required value="<?= (int)($product['stock_qty'] ?? 0) ?>">
-      </div>
-    </div>
-
-    <div>
-      <label class="block text-sm text-gray-700 mb-1">Ảnh hiện tại</label>
-      <div class="w-40 h-28 bg-gray-100 rounded overflow-hidden flex items-center justify-center mb-2">
-        <?php if (!empty($product['image_path'])): ?>
-          <img src="<?= e(app_url($product['image_path'])) ?>" alt="<?= e($product['name']) ?>" class="w-full h-full object-cover">
-        <?php else: ?>
-          <div class="text-xs text-gray-400">No image</div>
+<div class="card card-outline card-secondary">
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="category_id">Danh mục</label>
+        <select name="category_id" id="category_id" class="form-control" required>
+          <option value="">-- Chọn danh mục --</option>
+          <?php foreach ($categories as $c): ?>
+            <?php $selected = ((int)$c['id'] === (int)$product['category_id']); ?>
+            <option value="<?= (int)$c['id'] ?>" <?= $selected ? 'selected' : '' ?>>
+              <?= e($c['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <?php if (!$categories): ?>
+          <small class="form-text text-danger">Chưa có danh mục. Vào <a href="<?= e(route_url('admin', 'categories')) ?>">Danh mục</a> để thêm trước.</small>
         <?php endif; ?>
       </div>
-      <label class="block text-sm text-gray-700 mb-1">Upload ảnh mới (tuỳ chọn)</label>
-      <input type="file" name="image" accept="image/*" class="w-full">
-    </div>
 
-    <button type="submit" class="w-full bg-blue-700 text-white rounded px-4 py-3 hover:bg-blue-800">
-      Lưu thay đổi
-    </button>
-  </form>
+      <div class="form-group">
+        <label for="product-name">Tên sản phẩm</label>
+        <input name="name" id="product-name" type="text" class="form-control" required value="<?= e($product['name'] ?? '') ?>">
+      </div>
+
+      <div class="form-group">
+        <label for="product-description">Mô tả</label>
+        <textarea name="description" id="product-description" rows="4" class="form-control"><?= e($product['description'] ?? '') ?></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="product-price">Giá (VND)</label>
+          <input name="price" id="product-price" type="number" min="0" class="form-control" required value="<?= (int)($product['price'] ?? 0) ?>">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="product-stock">Tồn kho</label>
+          <input name="stock_qty" id="product-stock" type="number" min="0" class="form-control" required value="<?= (int)($product['stock_qty'] ?? 0) ?>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ảnh hiện tại</label>
+        <div class="mb-3 border rounded bg-light d-flex align-items-center justify-content-center overflow-hidden" style="width: 160px; height: 112px;">
+          <?php if (!empty($product['image_path'])): ?>
+            <img src="<?= e(app_url($product['image_path'])) ?>" alt="<?= e($product['name']) ?>" class="img-fluid" style="max-height: 112px; width: 100%; object-fit: cover;">
+          <?php else: ?>
+            <span class="small text-muted">Chưa có ảnh</span>
+          <?php endif; ?>
+        </div>
+        <label for="product-image">Upload ảnh mới (JPG/PNG/WEBP, tối đa 2MB, tuỳ chọn)</label>
+        <input type="file" name="image" id="product-image" accept="image/*" class="form-control-file">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Lưu thay đổi</button>
+    </form>
+  </div>
 </div>
 
 <?php require_once __DIR__ . '/includes/layout_end.php'; ?>
