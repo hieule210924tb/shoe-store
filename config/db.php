@@ -27,11 +27,6 @@ function db(): PDO
   return $pdo;
 }
 
-/**
- * ===== CRUD helpers dùng chung (PDO) =====
- * Lưu ý: với các hàm insert/update/delete theo $table, chỉ cho phép tên bảng/cột dạng [a-zA-Z0-9_]
- * để giảm rủi ro injection qua identifier.
- */
 
 function db_ident(string $name): string
 {

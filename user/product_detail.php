@@ -18,6 +18,9 @@ if (!$product) {
   redirect('user/index.php');
 }
 
+$ratingSummary = fetch_product_rating_summary($id);
+$reviews = fetch_product_reviews($id);
+
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
@@ -93,6 +96,62 @@ require_once __DIR__ . '/../includes/layout/header.php';
 
         <div class="mt-3 text-xs text-gray-500">
           Bấm thêm vào giỏ để chuẩn bị thanh toán.
+        </div>
+
+        <div class="mt-8 border-t pt-4">
+          <?php $avgRounded = (int)round((float)($ratingSummary['avg_rating'] ?? 0)); ?>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <div class="text-sm text-gray-500">Đánh giá trung bình</div>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="text-yellow-600 font-semibold">
+                  <?php for ($i = 1; $i <= 5; $i++): ?>
+                    <span style="font-size:18px;"><?= ((int)$i <= $avgRounded) ? '&#9733;' : '&#9734;' ?></span>
+                  <?php endfor; ?>
+                </div>
+                <div class="text-sm text-gray-700">
+                  <?= number_format((float)($ratingSummary['avg_rating'] ?? 0), 1, ',', '.') ?>/5
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                <?= (int)($ratingSummary['review_count'] ?? 0) ?> đánh giá
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h2 class="font-semibold text-base mb-2">Bình luận</h2>
+            <?php if (!$reviews): ?>
+              <div class="text-sm text-gray-500">Chưa có đánh giá nào.</div>
+            <?php else: ?>
+              <div class="space-y-3">
+                <?php foreach ($reviews as $r): ?>
+                  <div class="border rounded p-3 bg-white">
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="font-medium text-sm">
+                        <?= e($r['user_name'] ?? 'Khách') ?>
+                      </div>
+                      <?php $rRounded = (int)round((float)($r['rating'] ?? 0)); ?>
+                      <div class="text-yellow-600 text-sm">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                          <span style="font-size:14px;"><?= ((int)$i <= $rRounded) ? '&#9733;' : '&#9734;' ?></span>
+                        <?php endfor; ?>
+                      </div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      <?= e(date('d/m/Y', strtotime((string)($r['created_at'] ?? '')))) ?>
+                    </div>
+                    <?php if (!empty($r['comment'])): ?>
+                      <div class="mt-2 text-sm text-gray-700 leading-relaxed">
+                        <?= nl2br(e($r['comment'])) ?>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+
         </div>
       </div>
 

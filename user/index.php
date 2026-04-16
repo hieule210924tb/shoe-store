@@ -29,7 +29,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
 <!-- Banner -->
-<div class="rounded-xl p-6 md:p-10" style="background:#d4ced4;">
+<div class="rounded-xl mt-14 p-6 md:p-10" style="background:#d4ced4;">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
     <?php foreach ($heroProducts as $hero): ?>
       <div class="h-28 md:h-32 flex items-end justify-center">

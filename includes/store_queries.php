@@ -27,6 +27,95 @@ function fetch_product_with_category(int $product_id): ?array
   ', [$product_id]);
 }
 
+function fetch_product_rating_summary(int $product_id): array
+{
+  $row = getOne(
+    'SELECT AVG(pr.rating) AS avg_rating, COUNT(*) AS review_count
+     FROM product_reviews pr
+     WHERE pr.product_id = ?',
+    [$product_id]
+  );
+
+  return [
+    'avg_rating' => (float)($row['avg_rating'] ?? 0),
+    'review_count' => (int)($row['review_count'] ?? 0),
+  ];
+}
+
+function fetch_product_reviews(int $product_id): array
+{
+  return getAll(
+    'SELECT
+      pr.rating,
+      pr.comment,
+      pr.created_at,
+      u.name AS user_name
+     FROM product_reviews pr
+     JOIN users u ON u.id = pr.user_id
+     WHERE pr.product_id = ?
+     ORDER BY pr.created_at DESC',
+    [$product_id]
+  );
+}
+
+function fetch_user_product_review(int $product_id, int $user_id): ?array
+{
+  return getOne(
+    'SELECT
+      pr.rating,
+      pr.comment,
+      pr.created_at
+     FROM product_reviews pr
+     WHERE pr.product_id = ? AND pr.user_id = ?
+     LIMIT 1',
+    [$product_id, $user_id]
+  );
+}
+
+function upsert_product_review(int $product_id, int $user_id, int $rating, ?string $comment): void
+{
+  $existing = getOne(
+    'SELECT id FROM product_reviews WHERE product_id = ? AND user_id = ? LIMIT 1',
+    [$product_id, $user_id]
+  );
+
+  if ($existing) {
+    updateRow('product_reviews', [
+      'rating' => $rating,
+      'comment' => $comment,
+    ], 'id = :review_id', [':review_id' => (int)$existing['id']]);
+    return;
+  }
+
+  insertRow('product_reviews', [
+    'user_id' => $user_id,
+    'product_id' => $product_id,
+    'rating' => $rating,
+    'comment' => $comment,
+  ]);
+}
+
+function user_has_paid_product(int $user_id, int $product_id): bool
+{
+  $row = getOne(
+    'SELECT 1
+     FROM orders o
+     JOIN order_items oi ON oi.order_id = o.id
+     WHERE o.user_id = ?
+       AND o.status = "paid"
+       AND oi.product_id = ?
+     LIMIT 1',
+    [$user_id, $product_id]
+  );
+
+  return $row !== null;
+}
+
+function user_has_purchased_product(int $user_id, int $product_id): bool
+{
+  return user_has_paid_product($user_id, $product_id);
+}
+
 function count_products(?int $category_id, string $q = ''): int
 {
   $sql = 'SELECT COUNT(*) AS total FROM products p';

@@ -29,6 +29,20 @@ $paymentLabels = [
   'vnpay' => 'VNPay',
   'cod' => 'Thanh toán khi nhận hàng',
 ];
+$canRateProducts = ((string)($order['status'] ?? '') === 'paid');
+$reviewedProductIds = [];
+if ($canRateProducts) {
+  foreach ($items as $item) {
+    $productId = (int)($item['product_id'] ?? 0);
+    if ($productId <= 0) {
+      continue;
+    }
+
+    if (fetch_user_product_review($productId, $uid)) {
+      $reviewedProductIds[$productId] = true;
+    }
+  }
+}
 
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
@@ -59,6 +73,19 @@ require_once __DIR__ . '/../includes/layout/header.php';
               SL: <?= (int)$it['quantity'] ?> •
               Đơn giá: <?= number_format((float)$it['unit_price'], 0, ',', '.') ?> VND
             </div>
+          </div>
+          <div class="shrink-0">
+            <?php if ($canRateProducts): ?>
+              <?php $hasReviewed = !empty($reviewedProductIds[(int)$it['product_id']]); ?>
+              <a
+                href="<?= e(app_url('user/product_rate.php?id=' . (int)$it['product_id'])) ?>"
+                class="text-sm px-3 py-2 rounded <?= $hasReviewed ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50' : 'bg-blue-700 text-white hover:bg-blue-800' ?>"
+              >
+                <?= $hasReviewed ? 'Lịch sử đánh giá' : 'Đánh giá' ?>
+              </a>
+            <?php else: ?>
+              <span class="text-xs text-gray-500">Chỉ đánh giá sau khi thanh toán thành công</span>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>

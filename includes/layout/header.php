@@ -7,6 +7,7 @@ $hideHeader = $hideHeader ?? false;
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="<?= e(app_url('assets/images/logo/logo.png')) ?>" type="image/png">
   <title><?= e($pageTitle) ?></title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,10 +25,10 @@ $hideHeader = $hideHeader ?? false;
 <body class="bg-gray-50 text-gray-900">
 
 <?php if (!$hideHeader): ?>
-  <header class="bg-white shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-      <a href="<?= e(route_url('user', 'index')) ?>" class="font-bold text-lg text-blue-700 hover:text-blue-800">
-        ShoeStore
+  <header class="bg-white shadow-sm fixed w-full z-50">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <a href="<?= e(route_url('user', 'index')) ?>">
+        <img width="80" src="assets/images/logo/log2.png" alt="shoe store">
       </a>
 
       <nav class="hidden md:flex items-center gap-4 text-sm">

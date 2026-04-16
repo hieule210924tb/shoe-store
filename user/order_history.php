@@ -54,10 +54,18 @@ require_once __DIR__ . '/../includes/layout/header.php';
             <div class="font-bold">
               <?= number_format((float)$o['total_amount'], 0, ',', '.') ?> VND
             </div>
-            <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>"
-               class="text-sm px-3 py-2 rounded border hover:bg-gray-50">
-              Xem chi tiết
-            </a>
+            <div class="flex items-center gap-2">
+              <?php if ((string)($o['status'] ?? '') === 'paid'): ?>
+                <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>"
+                   class="text-sm px-3 py-2 rounded bg-blue-700 text-white hover:bg-blue-800">
+                  Đánh giá sản phẩm
+                </a>
+              <?php endif; ?>
+              <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>"
+                 class="text-sm px-3 py-2 rounded border hover:bg-gray-50">
+                Xem chi tiết
+              </a>
+            </div>
           </div>
         </div>
       <?php endforeach; ?>
