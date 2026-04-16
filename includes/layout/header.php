@@ -28,7 +28,7 @@ $hideHeader = $hideHeader ?? false;
   <header class="bg-white shadow-sm fixed w-full z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <a href="<?= e(route_url('user', 'index')) ?>">
-        <img width="80" src="assets/images/logo/log2.png" alt="shoe store">
+        <img width="80" src="<?= e(app_url('assets/images/logo/log2.png')) ?>" alt="shoe store">
       </a>
 
       <nav class="hidden md:flex items-center gap-4 text-sm">
