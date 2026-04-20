@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * Tập hàm truy vấn MySQL dùng chung.
- * (PDO + truy vấn prepared statements)
- */
 
 function fetch_all_categories(): array
 {

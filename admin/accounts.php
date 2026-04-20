@@ -72,6 +72,8 @@ require_once __DIR__ . '/includes/layout_start.php';
   </div>
   <div class="card-body border-bottom">
     <form method="get" class="form-inline">
+      <input type="hidden" name="module" value="admin">
+      <input type="hidden" name="action" value="accounts">
       <input type="text" name="q" value="<?= e($q) ?>" class="form-control mr-2" placeholder="Tìm theo tên hoặc email">
       <button type="submit" class="btn btn-primary">Tìm</button>
     </form>

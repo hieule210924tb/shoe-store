@@ -50,6 +50,8 @@ require_once __DIR__ . '/includes/layout_start.php';
   </div>
   <div class="card-body">
     <form method="get" class="form-row align-items-end">
+      <input type="hidden" name="module" value="admin">
+      <input type="hidden" name="action" value="products">
       <div class="form-group col-md-8 col-lg-6 mb-0">
         <label for="product-q">Tìm theo tên</label>
         <input

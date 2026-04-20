@@ -48,6 +48,8 @@ require_once __DIR__ . '/includes/layout_start.php';
   </div>
   <div class="card-body">
     <form method="get" class="form-row align-items-end">
+      <input type="hidden" name="module" value="admin">
+      <input type="hidden" name="action" value="orders">
       <div class="form-group col-md-5 col-lg-4 mb-md-0">
         <label for="order-q">Tìm theo khách (tên/email)</label>
         <input
@@ -70,7 +72,7 @@ require_once __DIR__ . '/includes/layout_start.php';
       </div>
       <div class="form-group col-md-3 col-lg-2 mb-0">
         <label class="d-none d-md-block">&nbsp;</label>
-        <button type="submit" class="btn btn-primary btn-block">Lọc</button>
+        <button type="submit" class="btn btn-primary btn-block"> Lọc</button>
       </div>
     </form>
     <p class="text-muted small mb-0 mt-2">Tổng: <strong><?= (int)$total ?></strong> đơn</p>

@@ -64,7 +64,7 @@ require_once __DIR__ . '/includes/layout_start.php';
   </div>
 </div>
 
-<div class="row">
+<!-- <div class="row">
   <section class="col-lg-7">
     <div class="card">
       <div class="card-header border-0">
@@ -107,7 +107,7 @@ require_once __DIR__ . '/includes/layout_start.php';
       </div>
     </div>
   </section>
-</div>
+</div> -->
 
 <div class="row">
   <div class="col-12">
@@ -148,7 +148,7 @@ $adminExtraScripts = <<<'HTML'
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqvmap/1.5.1/jquery.vmap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqvmap/1.5.1/maps/jquery.vmap.usa.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
+<!-- <script>
 (function () {
   var months = ['T1','T2','T3','T4','T5','T6','T7'];
   var areaData = [1000, 1200, 1700, 1500, 2100, 1900, 2300];
@@ -208,7 +208,7 @@ $adminExtraScripts = <<<'HTML'
     });
   }
 })();
-</script>
+</script> -->
 HTML;
 
 require_once __DIR__ . '/includes/layout_end.php';
