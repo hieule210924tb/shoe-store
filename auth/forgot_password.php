@@ -52,51 +52,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<section class="min-h-[calc(100vh-160px)] flex items-center">
-  <div class="w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-      <div class="hidden lg:block">
-        <div class="bg-white border rounded-xl overflow-hidden">
-          <div class="aspect-[4/3] bg-gray-100 flex items-center justify-center">
-            <img
-              src="<?= e(app_url('assets/images/logo/login.webp')) ?>"
-              class="w-full h-full object-cover"
-              alt="Forgot password image"
-            >
-          </div>
-        </div>
-      </div>
+<section class="min-h-screen flex items-center">
+  <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 shadow-xl rounded-2xl overflow-hidden bg-white">
 
-      <div class="max-w-md mx-auto w-full">
-        <form method="POST" class="bg-white border rounded-xl p-6 sm:p-8 space-y-4">
-          <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Quên mật khẩu</h1>
-          </div>
-          <p class="text-gray-600 text-sm">Nhập email của bạn để nhận liên kết đặt lại mật khẩu.</p>
+    <!-- LEFT IMAGE -->
+    <div class="hidden lg:flex items-center justify-center bg-gray-50 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-gray-200 to-transparent"></div>
 
-          <div>
-            <label class="block text-sm text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="Địa chỉ email"
-              required
-              value="<?= e($_POST['email'] ?? '') ?>"
-            >
-          </div>
-
-          <div class="pt-2">
-            <button class="w-full bg-blue-700 text-white rounded py-2 hover:bg-blue-800" type="submit">
-              Gửi
-            </button>
-            <div class="text-center text-sm mt-3 text-gray-600">
-              Quay lại <a class="text-blue-700 hover:underline" href="<?= e(route_url('auth', 'login')) ?>">Đăng nhập</a>
-            </div>
-          </div>
-        </form>
-      </div>
+      <img 
+        src="<?= e(app_url('assets/images/logo/unnamed.png')) ?>"
+        alt="Forgot password image"
+        class="relative w-[85%] transform rotate-[-10deg] transition-all duration-500 hover:-translate-x-10 hover:rotate-[-12deg] drop-shadow-2xl"
+      >
     </div>
+
+    <!-- RIGHT FORM -->
+    <div class="flex items-center justify-center p-8 sm:p-12">
+      <form method="POST" class="w-full max-w-md space-y-6">
+
+        <!-- Title -->
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Quên mật khẩu</h1>
+          <p class="text-gray-500 text-sm mt-2">
+            Nhập email của bạn để nhận liên kết đặt lại mật khẩu.
+          </p>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Địa chỉ email
+          </label>
+          <input
+            type="email"
+            name="email"
+            class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-red-600 transition"
+            placeholder="name@domain.com"
+            required
+            value="<?= e($_POST['email'] ?? '') ?>"
+          >
+        </div>
+
+        <!-- Button -->
+        <button 
+          type="submit"
+          class="w-full bg-red-700 text-white py-3 font-semibold tracking-wide hover:bg-red-800 transition"
+        >
+          Gửi liên kết đặt lại mật khẩu
+        </button>
+
+        <!-- Back -->
+        <div class="text-center text-sm text-gray-600">
+          Quay lại 
+          <a class="text-red-600 font-semibold hover:underline" href="<?= e(route_url('auth', 'login')) ?>">
+            Đăng nhập
+          </a>
+        </div>
+
+      </form>
+    </div>
+
   </div>
 </section>
 

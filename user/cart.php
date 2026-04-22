@@ -11,7 +11,6 @@ $pageTitle = 'Giỏ hàng';
 
 $uid = current_user_id();
 $items = cart_get_items($uid);
-
 $total = 0.0;
 foreach ($items as $it) {
   $total += ((float)$it['price']) * (int)$it['quantity'];

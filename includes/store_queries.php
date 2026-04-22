@@ -162,7 +162,6 @@ function fetch_products(?int $category_id, string $q, int $offset, int $limit): 
 
   $sql .= ' ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
 
-  // Không dùng helper ở đây vì cần bindValue kiểu int cho limit/offset
   $stmt = db()->prepare($sql);
   foreach ($params as $k => $v) {
     $stmt->bindValue($k, $v, PDO::PARAM_STR);
@@ -233,6 +232,12 @@ function cart_get_items(int $user_id): array
     JOIN products p ON p.id = c.product_id
     WHERE c.user_id = ?
   ', [$user_id]);
+}
+// Đếm số lượng trong giỏ hàng
+function cart_count_quantity(int $user_id): int
+{
+  $row = getOne('SELECT COALESCE(SUM(quantity), 0) AS total_qty FROM cart WHERE user_id = ?', [$user_id]);
+  return (int)($row['total_qty'] ?? 0);
 }
 
 function cart_update_item(int $user_id, int $cart_id, int $shoe_size, int $quantity): void

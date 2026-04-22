@@ -46,67 +46,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<section class="min-h-[calc(100vh-160px)] flex items-center">
-  <div class="w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-      <div class="hidden lg:block">
-        <div class="bg-white border rounded-xl overflow-hidden">
-          <div class="aspect-[4/3] bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-            <div class="col-md-9 col-lg-6 col-xl-5">
-            <img src="<?= e(app_url('assets/images/logo/login.webp')) ?>" class="img-fluid"
-                    alt="Login image">
-            </div>
-          </div>
+<section class=" flex items-center">
+  <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 shadow-xl rounded-2xl overflow-hidden bg-white">
+
+    <!-- LEFT IMAGE -->
+    <div class="hidden lg:flex items-center justify-center bg-gray-50 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-gray-200 to-transparent"></div>
+
+      <img 
+        src="<?= e(app_url('assets/images/logo/unnamed.png')) ?>"
+        alt="Login image"
+        class="relative w-[85%] transform rotate-[-10deg] transition-all duration-500 hover:-translate-x-10 hover:rotate-[-12deg] drop-shadow-2xl"
+      >
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="flex items-center justify-center p-8 sm:p-12">
+      <form method="POST" class="w-full max-w-md space-y-6">
+
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Đăng nhập</h1>
         </div>
-      </div>
 
-      <div class="max-w-md mx-auto w-full">
-        <form method="POST" class="bg-white border rounded-xl p-6 sm:p-8 space-y-4">
-          <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Đăng nhập hệ thống</h1>
-          </div>
+        <!-- Email -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Địa chỉ Email</label>
+          <input
+            name="email"
+            type="email"
+            class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-red-600 transition"
+            placeholder="name@email.com"
+            required
+            value="<?= e($_POST['email'] ?? '') ?>"
+          >
+        </div>
 
-          <div>
-            <label class="block text-sm text-gray-700 mb-1">Email</label>
-            <input
-              name="email"
-              type="email"
-              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="Địa chỉ email"
-              required
-              value="<?= e($_POST['email'] ?? '') ?>"
-            >
-          </div>
-
-          <div>
-            <label class="block text-sm text-gray-700 mb-1">Mật khẩu</label>
-            <input
-              name="password"
-              type="password"
-              class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="Nhập mật khẩu"
-              required
-            >
-          </div>
-
-          <div class="flex justify-between items-center text-sm">
-            <a class="text-gray-700 hover:text-blue-700 hover:underline" href="<?= e(route_url('auth', 'forgot')) ?>">
+        <!-- Password -->
+        <div>
+          <div class="flex justify-between text-xs font-semibold text-gray-500 uppercase">
+            <label>Mật khẩu</label>
+            <a href="<?= e(route_url('auth', 'forgot')) ?>" class="text-red-600 hover:underline">
               Quên mật khẩu?
             </a>
           </div>
 
-          <div class="pt-2">
-            <button class="w-full bg-blue-700 text-white rounded py-2 hover:bg-blue-800" type="submit">
-              Đăng nhập
-            </button>
-            <p class="text-sm text-gray-600 mt-3">
-              Bạn chưa có tài khoản?
-              <a class="text-red-600 hover:underline font-semibold" href="<?= e(route_url('auth', 'register')) ?>">Đăng kí ngay</a>
-            </p>
-          </div>
-        </form>
-      </div>
+          <input
+            name="password"
+            type="password"
+            class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-red-600 transition"
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <!-- Button -->
+        <button 
+          type="submit"
+          class="w-full bg-red-700 text-white py-3 font-semibold tracking-wide hover:bg-red-800 transition"
+        >
+          LOG IN
+        </button>
+
+        <!-- Register -->
+        <p class="text-sm text-gray-600 text-center">
+          Bạn chưa có tài khoản?
+          <a class="text-red-600 font-semibold hover:underline" href="<?= e(route_url('auth', 'register')) ?>">
+            Đăng ký
+          </a>
+        </p>
+
+      </form>
     </div>
+
   </div>
 </section>
 

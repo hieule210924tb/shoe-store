@@ -8,30 +8,30 @@
       <div class="lg:col-span-2">
         <a href="<?= e(route_url('user', 'index')) ?>" class="inline-flex items-center gap-3">
           <img
-            src="<?= e(app_url('assets/images/logo/log2.png')) ?>"
+            src="<?= e(app_url('assets/images/logo/hiele.png')) ?>"
             alt="shoe store"
-            width="200"
-            height="200"
+            width="100"
+            height="100"
           >
         </a>
 
         <p class="mt-4 text-sm text-gray-600 leading-relaxed">
-          1Sneaker.vn là shop chuyên cung cấp các dòng sản phẩm về giày Sneaker như
+          1Hieule.vn là shop chuyên cung cấp các dòng sản phẩm về giày Sneaker như
           Adidas, Nike, Vans, Converse,...
         </p>
 
         <div class="mt-5 space-y-3 text-sm text-gray-700">
           <div class="flex items-start gap-2">
             <span class="mt-0.5 text-gray-500">📍</span>
-            <span>Địa chỉ: 435 Âu Cơ, Liên Chiểu, Đà Nẵng</span>
+            <span>Địa chỉ: 123 Trung Kính, Cầu Giấy, Hà Nội</span>
           </div>
           <div class="flex items-start gap-2">
             <span class="mt-0.5 text-gray-500">📞</span>
-            <span>Hotline: (+84) 905 692 314</span>
+            <span>Hotline: (+84) 3 358 684</span>
           </div>
           <div class="flex items-start gap-2">
             <span class="mt-0.5 text-gray-500">✉️</span>
-            <span>Email: giaydep@gmail.com</span>
+            <span>Email: hieule@gmail.com</span>
           </div>
         </div>
       </div>
@@ -65,11 +65,9 @@
         <div class="mt-8">
           <div class="text-sm font-semibold tracking-wide text-gray-900 uppercase">Đơn vị vận chuyển</div>
           <div class="mt-4 flex flex-wrap gap-2">
-            <span class="px-3 py-1 rounded border text-xs text-gray-700 bg-gray-50">GHN</span>
-            <span class="px-3 py-1 rounded border text-xs text-gray-700 bg-gray-50">GHTK</span>
-            <span class="px-3 py-1 rounded border text-xs text-gray-700 bg-gray-50">Viettel Post</span>
-            <span class="px-3 py-1 rounded border text-xs text-gray-700 bg-gray-50">J&T</span>
-            <span class="px-3 py-1 rounded border text-xs text-gray-700 bg-gray-50">Grab</span>
+            <img width="50" height="50" class="rounded-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTe40xGC8F5daSBeV8k5HTVtn-shEsKhMzByA&s" alt="GHTK">
+            <img width="50" height="50" class="rounded-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSalhFozbhPebauvK49k5FTD-EPLX6KOy-dSg&s" alt="GHTK">
+            <img width="50" height="50" class="rounded-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT17MhJQlKG1wbChrQejf-KFXXxHGQlCQKdrQ&s" alt="GHTK">
           </div>
         </div>
       </div>

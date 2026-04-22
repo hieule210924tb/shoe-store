@@ -24,7 +24,7 @@ $reviews = fetch_product_reviews($id);
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<div class="flex flex-col lg:flex-row gap-6">
+<div class="flex flex-col mt-12 lg:flex-row gap-6">
   <div class="lg:w-1/2">
     <div class="bg-white border rounded-lg overflow-hidden">
       <div class="h-72 bg-gray-100 flex items-center justify-center">
