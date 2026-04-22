@@ -124,14 +124,14 @@ require_once __DIR__ . '/../includes/layout/header.php';
 <div class="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
   <div class="flex flex-wrap gap-2">
     <a href="<?= e(app_url('user/index.php')) ?>"
-       class="px-3 py-2 rounded border <?= (!$category_id ? 'bg-red-700 text-white border-red-700' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50') ?>">
+       class="px-3 py-2 rounded border <?= (!$category_id ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-200 hover:bg-red-50 hover:border-red-300') ?>">
       Tất cả
     </a>
     <?php foreach ($categories as $c): ?>
       <?php $active = ((int)($category_id ?? 0) === (int)$c['id']); ?>
       <a href="<?= e(app_url('user/index.php?category_id=' . $c['id'] . '&q=' . urlencode($q) . '&page=1')) ?>"
          class="px-3 py-2 rounded border
-           <?= $active ? 'bg-red-700 text-white border-red-700' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' ?>">
+           <?= $active ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-200 hover:bg-red-50 hover:border-red-300' ?>">
         <?= e($c['name']) ?>
       </a>
     <?php endforeach; ?>
@@ -145,9 +145,9 @@ require_once __DIR__ . '/../includes/layout/header.php';
       name="q"
       value="<?= e($q) ?>"
       placeholder="Tìm theo tên giày..."
-      class="w-full md:w-80 border border-gray-200 rounded px-3 py-2 bg-white"
+      class="w-full md:w-80 border border-red-200 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300"
     >
-    <button class="px-4 py-2 rounded bg-gray-900 text-white hover:bg-black" type="submit">Tìm</button>
+    <button class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-200" type="submit">Tìm</button>
   </form>
 </div>
 
@@ -171,7 +171,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
     
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <?php foreach ($products as $p): ?>
-        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden relative">
+        <div class="bg-white border border-red-100 rounded-lg overflow-hidden relative hover:border-red-200 hover:shadow-sm transition">
             <div class="group relative z-0 h-44 bg-gray-50 flex items-center justify-center">
               <?php if (!empty($p['image_path'])): ?>
                 <img src="<?= e(app_url($p['image_path'])) ?>" alt="<?= e($p['name']) ?>" class="w-full h-full object-contain p-3">
@@ -184,7 +184,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
                   <input type="hidden" name="product_id" value="<?= (int)$p['id'] ?>">
                   <input type="hidden" name="shoe_size" value="40">
                   <button
-                    class="w-10 h-10 rounded-full bg-white/95 border border-gray-200 text-gray-800 shadow-sm flex items-center justify-center opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 focus:opacity-100 focus:translate-y-0 hover:bg-red-500 hover:text-white"
+                    class="w-10 h-10 rounded-full bg-white/95 border border-red-200 text-gray-800 shadow-sm flex items-center justify-center opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 focus:opacity-100 focus:translate-y-0 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-200"
                     type="submit"
                     aria-label="Thêm vào giỏ hàng"
                     title="Thêm vào giỏ hàng"
@@ -229,7 +229,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
       <a
         href="<?= e(app_url('user/index.php?category_id=' . (int)($category_id ?? 0) . '&q=' . urlencode($q) . '&page=' . $i)) ?>"
         class="px-3 py-2 rounded border text-sm
-          <?= $active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' ?>"
+          <?= $active ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-red-200 hover:bg-red-50 hover:border-red-300' ?>"
       >
         <?= $i ?>
       </a>

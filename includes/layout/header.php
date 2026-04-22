@@ -69,7 +69,7 @@ if (!$hideHeader && is_logged_in()) {
 
       <?php if (is_admin()): ?>
         <a href="<?= e(route_url('admin', 'dashboard')) ?>" 
-           class="px-3 py-1.5 rounded bg-gray-900 text-white hover:bg-black transition text-xs">
+           class="px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition text-xs focus:outline-none focus:ring-2 focus:ring-red-200">
           Admin
         </a>
       <?php endif; ?>
@@ -85,14 +85,14 @@ if (!$hideHeader && is_logged_in()) {
         </div>
 
         <a href="<?= e(route_url('auth', 'logout')) ?>"
-           class="text-sm px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 transition">
+           class="text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 transition focus:outline-none focus:ring-2 focus:ring-red-200">
           Đăng xuất
         </a>
 
       <?php else: ?>
 
         <a href="<?= e(route_url('auth', 'login')) ?>"
-           class="text-sm px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 transition">
+           class="text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 transition focus:outline-none focus:ring-2 focus:ring-red-200">
           Đăng nhập
         </a>
 

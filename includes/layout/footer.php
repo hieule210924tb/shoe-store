@@ -39,27 +39,27 @@
       <div>
         <div class="text-sm font-semibold tracking-wide text-gray-900 uppercase">Chính sách</div>
         <ul class="mt-4 space-y-2 text-sm text-gray-600">
-          <li><a href="<?= e(app_url('includes/layout/contentFooter/size.php')) ?>" class="hover:text-blue-700">Chọn size</a></li>
-          <li><a href="#" class="hover:text-blue-700">Giới thiệu</a></li>
-          <li><a href="#" class="hover:text-blue-700">Hướng dẫn mua hàng</a></li>
+          <li><a href="<?= e(app_url('includes/layout/contentFooter/size.php')) ?>" class="hover:text-red-700">Chọn size</a></li>
+          <li><a href="#" class="hover:text-red-700">Giới thiệu</a></li>
+          <li><a href="#" class="hover:text-red-700">Hướng dẫn mua hàng</a></li>
         </ul>
       </div>
 
       <div>
         <div class="text-sm font-semibold tracking-wide text-gray-900 uppercase">Thông tin</div>
         <ul class="mt-4 space-y-2 text-sm text-gray-600">
-          <li><a href="#" class="hover:text-blue-700">Về chúng tôi</a></li>
-          <li><a href="#" class="hover:text-blue-700">Liên hệ</a></li>
+          <li><a href="#" class="hover:text-red-700">Về chúng tôi</a></li>
+          <li><a href="#" class="hover:text-red-700">Liên hệ</a></li>
         </ul>
       </div>
 
       <div>
         <div class="text-sm font-semibold tracking-wide text-gray-900 uppercase">Thông tin</div>
         <ul class="mt-4 space-y-2 text-sm text-gray-600">
-          <li><a href="#" class="hover:text-blue-700">Về chúng tôi</a></li>
-          <li><a href="#" class="hover:text-blue-700">Câu hỏi thường gặp</a></li>
-          <li><a href="#" class="hover:text-blue-700">Tin tức</a></li>
-          <li><a href="#" class="hover:text-blue-700">Liên hệ</a></li>
+          <li><a href="#" class="hover:text-red-700">Về chúng tôi</a></li>
+          <li><a href="#" class="hover:text-red-700">Câu hỏi thường gặp</a></li>
+          <li><a href="#" class="hover:text-red-700">Tin tức</a></li>
+          <li><a href="#" class="hover:text-red-700">Liên hệ</a></li>
         </ul>
 
         <div class="mt-8">
