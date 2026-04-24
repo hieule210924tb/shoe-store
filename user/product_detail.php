@@ -24,12 +24,13 @@ $reviews = fetch_product_reviews($id);
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<div class="flex flex-col mt-12 lg:flex-row gap-6">
+<div class="flex flex-col mt-20 lg:flex-row gap-6">
   <div class="lg:w-1/2">
     <div class="bg-white border rounded-lg overflow-hidden">
       <div class="h-72 bg-gray-100 flex items-center justify-center">
         <?php if (!empty($product['image_path'])): ?>
-          <img src="<?= e(app_url($product['image_path'])) ?>" alt="<?= e($product['name']) ?>" class="w-full h-full object-cover">
+          <img src="<?= e(app_url($product['image_path'])) ?>" alt="<?= e($product['name']) ?>"
+            class="w-full h-full object-cover">
         <?php else: ?>
           <div class="text-gray-400 text-sm">No image</div>
         <?php endif; ?>
@@ -57,12 +58,8 @@ require_once __DIR__ . '/../includes/layout/header.php';
           <input type="hidden" name="product_id" value="<?= (int)$product['id'] ?>">
           <div class="flex flex-col">
             <label class="text-sm text-gray-700 mb-1">Size</label>
-            <select
-              name="shoe_size"
-              class="w-28 border border-gray-200 rounded px-3 py-2 bg-white"
-              required
-              <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>
-            >
+            <select name="shoe_size" class="w-28 border border-gray-200 rounded px-3 py-2 bg-white" required
+              <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>>
               <?php foreach (get_shoe_sizes() as $size): ?>
                 <option value="<?= (int)$size ?>" <?= ((int)$size === 40) ? 'selected' : '' ?>>
                   <?= (int)$size ?>
@@ -73,23 +70,13 @@ require_once __DIR__ . '/../includes/layout/header.php';
 
           <div class="flex flex-col">
             <label class="text-sm text-gray-700 mb-1">Số lượng</label>
-            <input
-              name="quantity"
-              type="number"
-              min="1"
-              max="<?= (int)$product['stock_qty'] ?>"
-              value="1"
-              class="w-28 border border-gray-200 rounded px-3 py-2"
-              required
-              <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>
-            >
+            <input name="quantity" type="number" min="1" max="<?= (int)$product['stock_qty'] ?>" value="1"
+              class="w-28 border border-gray-200 rounded px-3 py-2" required
+              <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>>
           </div>
 
-          <button
-            class="px-4 py-2 rounded bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-50"
-            type="submit"
-            <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>
-          >
+          <button class="px-4 py-2 rounded bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-50"
+            type="submit" <?= ((int)$product['stock_qty'] <= 0) ? 'disabled' : '' ?>>
             Thêm vào giỏ
           </button>
         </form>
@@ -106,7 +93,8 @@ require_once __DIR__ . '/../includes/layout/header.php';
               <div class="flex items-center gap-2 mt-1">
                 <div class="text-yellow-600 font-semibold">
                   <?php for ($i = 1; $i <= 5; $i++): ?>
-                    <span style="font-size:18px;"><?= ((int)$i <= $avgRounded) ? '&#9733;' : '&#9734;' ?></span>
+                    <span
+                      style="font-size:18px;"><?= ((int)$i <= $avgRounded) ? '&#9733;' : '&#9734;' ?></span>
                   <?php endfor; ?>
                 </div>
                 <div class="text-sm text-gray-700">
@@ -134,7 +122,8 @@ require_once __DIR__ . '/../includes/layout/header.php';
                       <?php $rRounded = (int)round((float)($r['rating'] ?? 0)); ?>
                       <div class="text-yellow-600 text-sm">
                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                          <span style="font-size:14px;"><?= ((int)$i <= $rRounded) ? '&#9733;' : '&#9734;' ?></span>
+                          <span
+                            style="font-size:14px;"><?= ((int)$i <= $rRounded) ? '&#9733;' : '&#9734;' ?></span>
                         <?php endfor; ?>
                       </div>
                     </div>
@@ -156,11 +145,11 @@ require_once __DIR__ . '/../includes/layout/header.php';
       </div>
 
       <div class="mt-5">
-        <a href="<?= e(app_url('user/index.php')) ?>" class="text-sm text-blue-700 hover:underline">← Quay lại</a>
+        <a href="<?= e(app_url('user/index.php')) ?>" class="text-sm text-blue-700 hover:underline">← Quay
+          lại</a>
       </div>
     </div>
   </div>
 </div>
 
 <?php require_once __DIR__ . '/../includes/layout/footer.php'; ?>
-
