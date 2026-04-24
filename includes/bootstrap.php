@@ -20,4 +20,5 @@ require_once __DIR__ . '/momo.php';
 require_once __DIR__ . '/vnpay.php';
 require_once __DIR__ . '/password_reset.php';
 require_once __DIR__ . '/store_queries.php';
+require_once __DIR__ . '/chat_queries.php';
 

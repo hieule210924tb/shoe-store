@@ -48,6 +48,16 @@ $routes = [
     'categories' => __DIR__ . '/admin/categories.php',
     'orders' => __DIR__ . '/admin/orders.php',
     'order_detail' => __DIR__ . '/admin/order_detail.php',
+    'chat' => __DIR__ . '/admin/chat.php',
+  ],
+  'chat' => [
+    'poll' => __DIR__ . '/chat/poll.php',
+    'send' => __DIR__ . '/chat/send.php',
+    'mark_read' => __DIR__ . '/chat/mark_read.php',
+    'admin_threads' => __DIR__ . '/chat/admin_threads.php',
+    'admin_poll' => __DIR__ . '/chat/admin_poll.php',
+    'admin_send' => __DIR__ . '/chat/admin_send.php',
+    'admin_mark_read' => __DIR__ . '/chat/admin_mark_read.php',
   ],
 ];
 
