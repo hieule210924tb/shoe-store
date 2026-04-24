@@ -31,62 +31,106 @@ $paymentLabels = [
 require_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
-<div class="flex items-center justify-between gap-4">
-  <h1 class="text-2xl font-bold">Đơn đã mua</h1>
-  <a href="<?= e(app_url('user/index.php')) ?>" class="text-sm text-blue-700 hover:underline">Tiếp tục mua</a>
+<div class="flex items-center justify-between gap-4 mt-[60px]">
+    <h1 class="text-2xl font-bold">Đơn đã mua</h1>
+    <a href="<?= e(app_url('user/index.php')) ?>"
+        class="text-sm text-[var(--checkout-text-muted)] hover:underline transition">
+        ← Tiếp tục mua
+    </a>
 </div>
 
 <?php if (!$orders): ?>
-  <div class="mt-6 rounded border bg-white p-6 text-center text-gray-600">
+<div class="mt-6 rounded-xl border bg-white p-10 text-center text-gray-500 shadow-sm">
     Bạn chưa có đơn hàng nào.
-  </div>
+</div>
 <?php else: ?>
-  <div class="mt-6 bg-white border rounded-lg p-4 md:p-6">
-    <div class="space-y-3">
-      <?php foreach ($orders as $o): ?>
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b last:border-b-0 pb-3 last:pb-0">
-          <div class="text-sm text-gray-600">
-            Mã đơn: <span class="font-medium text-gray-900">#<?= (int)$o['id'] ?></span>
-            • <?= e(date('d/m/Y H:i', strtotime((string)$o['created_at']))) ?>
-            • <?= e($paymentLabels[(string)($o['payment_method'] ?? '')] ?? (string)($o['payment_method'] ?? '')) ?>
-          </div>
-          <div class="flex items-center justify-between gap-3">
-            <div class="font-bold">
-              <?= number_format((float)$o['total_amount'], 0, ',', '.') ?> VND
+
+<div class="mt-6 space-y-4">
+
+    <?php foreach ($orders as $o): ?>
+
+    <div class="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition">
+
+        <!-- TOP -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+
+            <div class="text-sm text-gray-500">
+                <span class="font-medium text-gray-900">
+                    #<?= (int)$o['id'] ?>
+                </span>
+                • <?= e(date('d/m/Y H:i', strtotime((string)$o['created_at']))) ?>
+                • <?= e($paymentLabels[(string)($o['payment_method'] ?? '')] ?? (string)($o['payment_method'] ?? '')) ?>
             </div>
-            <div class="flex items-center gap-2">
-              <?php if ((string)($o['status'] ?? '') === 'paid'): ?>
-                <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>"
-                   class="text-sm px-3 py-2 rounded bg-blue-700 text-white hover:bg-blue-800">
-                  Đánh giá sản phẩm
-                </a>
-              <?php endif; ?>
-              <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>"
-                 class="text-sm px-3 py-2 rounded border hover:bg-gray-50">
-                Xem chi tiết
-              </a>
+
+            <!-- STATUS -->
+            <div>
+                <?php if ((string)($o['status'] ?? '') === 'paid'): ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-medium">
+                    Đã thanh toán
+                </span>
+                <?php else: ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 font-medium">
+                    Chờ xử lý
+                </span>
+                <?php endif; ?>
             </div>
-          </div>
+
         </div>
-      <?php endforeach; ?>
+
+        <!-- BOTTOM -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-3">
+
+            <!-- TOTAL -->
+            <div class="text-lg font-bold text-red-600">
+                <?= number_format((float)$o['total_amount'], 0, ',', '.') ?>₫
+            </div>
+
+            <!-- ACTION -->
+            <div class="flex items-center gap-2">
+
+                <?php if ((string)($o['status'] ?? '') === 'paid'): ?>
+                <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>" class="px-4 py-2 rounded-lg text-sm font-medium
+                          text-blue-600 bg-blue-50
+                          hover:bg-blue-100 transition">
+                    Đánh giá
+                </a>
+                <?php endif; ?>
+
+                <a href="<?= e(app_url('user/order_detail.php?id=' . (int)$o['id'])) ?>" class="px-4 py-2 rounded-lg text-sm font-medium
+                          border border-gray-300 text-gray-700
+                          hover:bg-gray-100 transition">
+                    Xem chi tiết
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <?php if ($total_pages > 1): ?>
-      <div class="mt-6 flex items-center justify-center gap-2">
-        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-          <?php $active = ($i === $page); ?>
-          <a
-            href="<?= e(app_url('user/order_history.php?page=' . $i)) ?>"
-            class="px-3 py-2 rounded border text-sm
-              <?= $active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' ?>"
-          >
-            <?= $i ?>
-          </a>
-        <?php endfor; ?>
-      </div>
-    <?php endif; ?>
-  </div>
+    <?php endforeach; ?>
+
+</div>
+
+<!-- PAGINATION -->
+<?php if ($total_pages > 1): ?>
+<div class="mt-8 flex items-center justify-center gap-2 flex-wrap">
+
+    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+    <?php $active = ($i === $page); ?>
+
+    <a href="<?= e(app_url('user/order_history.php?page=' . $i)) ?>" class="px-3 py-2 text-sm rounded-lg transition
+       <?= $active
+          ? 'bg-gray-900 text-white'
+          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100' ?>">
+        <?= $i ?>
+    </a>
+
+    <?php endfor; ?>
+
+</div>
+<?php endif; ?>
+
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/layout/footer.php'; ?>
-
