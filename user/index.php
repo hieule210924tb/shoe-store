@@ -60,7 +60,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
             <div class="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent"></div>
 
             <div class="relative h-full max-w-6xl mx-auto px-4 flex items-center">
-              <div class="text-white">
+              <div class="text-white mt-[240px]">
                 <p class="text-white/90 text-sm md:text-lg">Mua giày chính hãng tại Sneaker Daily</p>
                 <h2 class="mt-2 text-3xl md:text-5xl font-bold tracking-tight">
                   <?= e($hero['name'] ?: 'adidas x Sporty & Rich') ?>
@@ -171,13 +171,18 @@ require_once __DIR__ . '/../includes/layout/header.php';
     
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <?php foreach ($products as $p): ?>
-        <div class="bg-white border border-red-100 rounded-lg overflow-hidden relative hover:border-red-200 hover:shadow-sm transition">
-            <div class="group relative z-0 h-44 bg-gray-50 flex items-center justify-center">
+        <div class="group bg-white border border-red-100 rounded-lg overflow-hidden relative hover:border-red-200 hover:shadow-sm transition">
+            <a
+              href="<?= e(app_url('user/product_detail.php?id=' . (int)$p['id'])) ?>"
+              class="block relative z-0 h-44 bg-gray-50"
+              aria-label="Xem chi tiết <?= e($p['name']) ?>"
+            >
               <?php if (!empty($p['image_path'])): ?>
                 <img src="<?= e(app_url($p['image_path'])) ?>" alt="<?= e($p['name']) ?>" class="w-full h-full object-contain p-3">
               <?php else: ?>
-                <div class="text-gray-400 text-sm">No image</div>
+                <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">No image</div>
               <?php endif; ?>
+            </a>
   
               <?php if ((int)$p['stock_qty'] > 0): ?>
                 <form method="POST" action="<?= e(app_url('user/cart_add.php')) ?>" class="absolute right-3 bottom-3 z-20" onclick="event.stopPropagation();">
@@ -200,21 +205,15 @@ require_once __DIR__ . '/../includes/layout/header.php';
               <?php else: ?>
                 <span class="absolute right-3 bottom-3 text-xs px-2 py-1 rounded bg-gray-700 text-white z-20">Hết hàng</span>
               <?php endif; ?>
-            </div>
             <div class="p-3 relative z-0">
               <div class="text-sm text-gray-500"><?= e($p['category_name']) ?></div>
               <h3 class="mt-1 text-[15px] leading-5 font-medium text-gray-900 min-h-[2.5rem]">
-                <?= e($p['name']) ?>
+                <a href="<?= e(app_url('user/product_detail.php?id=' . (int)$p['id'])) ?>" class="hover:text-red-600 transition">
+                  <?= e($p['name']) ?>
+                </a>
               </h3>
               <div class="mt-2 text-xl font-bold text-gray-900"><?= number_format((float)$p['price'], 0, ',', '.') ?> đ</div>
             </div>
-
-          <!-- Link phủ toàn card (đặt cuối để luôn nằm trên nội dung) -->
-          <a
-            href="<?= e(app_url('user/product_detail.php?id=' . (int)$p['id'])) ?>"
-            class="absolute inset-0 z-10"
-            aria-label="Xem chi tiết <?= e($p['name']) ?>"
-          ></a>
         </div>
       <?php endforeach; ?>
     </div>

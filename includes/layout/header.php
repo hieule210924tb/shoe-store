@@ -38,7 +38,7 @@ if (!$hideHeader && is_logged_in()) {
 
     <!-- Logo -->
     <a href="<?= e(route_url('user', 'index')) ?>" class="flex items-center gap-2">
-      <img width="70" src="<?= e(app_url('assets/images/logo/hiele.png')) ?>" alt="shoe store">
+      <img width="70" src="<?= e(app_url('assets/images/logo/hiele-preview.png')) ?>" alt="shoe store">
     </a>
 
     <!-- Menu -->

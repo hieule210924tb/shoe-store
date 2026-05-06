@@ -160,7 +160,7 @@ require_once __DIR__ . '/../includes/layout/header.php';
           type="submit"
           class="w-full bg-red-700 text-white py-3 font-semibold tracking-wide hover:bg-red-800 transition"
         >
-          CREATE ACCOUNT
+          Đăng ký
         </button>
 
         <!-- Login -->
