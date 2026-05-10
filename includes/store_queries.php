@@ -808,6 +808,65 @@ function admin_delete_category(int $id): void
   $stmt->execute([$id]);
 }
 
+function admin_update_cod_pending_order_status(int $orderId, string $nextStatus): void
+{
+  if (!in_array($nextStatus, ['paid', 'cancelled'], true)) {
+    throw new RuntimeException('Trạng thái cập nhật không hợp lệ.');
+  }
+
+  $pdo = db();
+  $pdo->beginTransaction();
+
+  try {
+    $orderStmt = $pdo->prepare('
+      SELECT id, payment_method, status
+      FROM orders
+      WHERE id = ?
+      LIMIT 1
+      FOR UPDATE
+    ');
+    $orderStmt->execute([$orderId]);
+    $order = $orderStmt->fetch();
+
+    if (!$order) {
+      throw new RuntimeException('Không tìm thấy đơn hàng.');
+    }
+    if ((string)$order['payment_method'] !== 'cod') {
+      throw new RuntimeException('Chỉ hỗ trợ cập nhật thủ công đơn COD.');
+    }
+    if ((string)$order['status'] !== 'pending') {
+      throw new RuntimeException('Chỉ cập nhật được đơn COD đang pending.');
+    }
+
+    if ($nextStatus === 'cancelled') {
+      $itemsStmt = $pdo->prepare('
+        SELECT product_id, quantity
+        FROM order_items
+        WHERE order_id = ?
+        FOR UPDATE
+      ');
+      $itemsStmt->execute([$orderId]);
+      $items = $itemsStmt->fetchAll();
+
+      $restoreStockStmt = $pdo->prepare('UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?');
+      foreach ($items as $item) {
+        $restoreStockStmt->execute([
+          (int)($item['quantity'] ?? 0),
+          (int)($item['product_id'] ?? 0),
+        ]);
+      }
+    }
+
+    $updateStmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
+    $updateStmt->execute([$nextStatus, $orderId]);
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+  }
+}
+
 /**
  * ADMIN: Đếm số đơn hàng (có thể lọc theo search/status).
  */
@@ -851,6 +910,7 @@ function admin_get_orders(int $offset, int $limit, ?string $q = null, ?string $s
       o.id,
       o.total_amount,
       o.status,
+      o.payment_method,
       o.created_at,
       u.name AS user_name,
       u.email AS user_email

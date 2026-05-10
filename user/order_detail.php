@@ -162,13 +162,29 @@ require_once __DIR__ . '/../includes/layout/header.php';
             <div class="flex justify-between items-center">
                 <span class="text-gray-500">Trạng thái</span>
 
-                <?php if ((string)$order['status'] === 'paid'): ?>
+                <?php
+                $orderStatus = (string)($order['status'] ?? '');
+                $orderPayment = (string)($order['payment_method'] ?? '');
+                ?>
+                <?php if ($orderStatus === 'paid'): ?>
                 <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600">
                     Đã thanh toán
                 </span>
-                <?php else: ?>
+                <?php elseif ($orderStatus === 'cancelled'): ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-600">
+                    Đơn hàng đã hủy
+                </span>
+                <?php elseif ($orderStatus === 'pending' && $orderPayment === 'cod'): ?>
                 <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600">
                     Chờ xử lý
+                </span>
+                <?php elseif ($orderStatus === 'pending'): ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-800">
+                    Chờ thanh toán
+                </span>
+                <?php else: ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                    <?= e($orderStatus !== '' ? $orderStatus : '—') ?>
                 </span>
                 <?php endif; ?>
             </div>

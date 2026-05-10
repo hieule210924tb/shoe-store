@@ -64,13 +64,29 @@ require_once __DIR__ . '/../includes/layout/header.php';
 
             <!-- STATUS -->
             <div>
-                <?php if ((string)($o['status'] ?? '') === 'paid'): ?>
+                <?php
+                $st = (string)($o['status'] ?? '');
+                $pm = (string)($o['payment_method'] ?? '');
+                ?>
+                <?php if ($st === 'paid'): ?>
                 <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-medium">
                     Đã thanh toán
                 </span>
-                <?php else: ?>
+                <?php elseif ($st === 'cancelled'): ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium">
+                    Đơn hàng đã hủy
+                </span>
+                <?php elseif ($st === 'pending' && $pm === 'cod'): ?>
                 <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 font-medium">
                     Chờ xử lý
+                </span>
+                <?php elseif ($st === 'pending'): ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-800 font-medium">
+                    Chờ thanh toán
+                </span>
+                <?php else: ?>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium">
+                    <?= e($st !== '' ? $st : '—') ?>
                 </span>
                 <?php endif; ?>
             </div>

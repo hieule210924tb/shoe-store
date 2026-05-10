@@ -28,6 +28,7 @@ $paymentLabels = [
   'vnpay' => 'VNPay',
   'cod' => 'Thanh toán khi nhận hàng',
 ];
+$isCodPending = ((string)($order['payment_method'] ?? '') === 'cod' && (string)($order['status'] ?? '') === 'pending');
 
 $stats = admin_stats();
 $adminActive = 'orders';
@@ -97,6 +98,27 @@ require_once __DIR__ . '/includes/layout_start.php';
         <div class="small text-muted mt-3 mb-0">
           Ngày tạo: <?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?>
         </div>
+        <?php if ($isCodPending): ?>
+          <div class="mt-3 pt-3 border-top">
+            <div class="small text-muted mb-2">Cập nhật trạng thái COD</div>
+            <div class="d-flex flex-wrap" style="gap: 8px;">
+              <form method="post" action="<?= e(app_url('admin/order_update_status.php')) ?>" class="d-inline">
+                <input type="hidden" name="order_id" value="<?= (int)$order['id'] ?>">
+                <input type="hidden" name="next_status" value="paid">
+                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Xác nhận đã thu tiền đơn COD này?');">
+                  Paid
+                </button>
+              </form>
+              <form method="post" action="<?= e(app_url('admin/order_update_status.php')) ?>" class="d-inline">
+                <input type="hidden" name="order_id" value="<?= (int)$order['id'] ?>">
+                <input type="hidden" name="next_status" value="cancelled">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hủy đơn COD này và hoàn lại tồn kho?');">
+                  Cancelled
+                </button>
+              </form>
+            </div>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
