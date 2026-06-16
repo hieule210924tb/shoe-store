@@ -22,8 +22,8 @@ require_once __DIR__ . '/includes/layout_start.php';
 ?>
 
 <div class="row">
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-info">
+  <div class="col-lg-3 col-6 animate-fade-in-up" style="animation-delay: 100ms; animation-fill-mode: forwards; opacity: 0;">
+    <div class="small-box bg-info hover:scale-105 transition-transform duration-300 cursor-pointer">
       <div class="inner">
         <h3><?= (int)$stats['total_orders'] ?></h3>
         <p>Đơn đã thanh toán</p>
@@ -32,8 +32,8 @@ require_once __DIR__ . '/includes/layout_start.php';
       <a href="<?= e(route_url('admin', 'orders')) ?>" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
     </div>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-success">
+  <div class="col-lg-3 col-6 animate-fade-in-up" style="animation-delay: 200ms; animation-fill-mode: forwards; opacity: 0;">
+    <div class="small-box bg-success hover:scale-105 transition-transform duration-300 cursor-pointer">
       <div class="inner">
         <h3><?= e(number_format((float)$stats['total_revenue'], 0, ',', '.')) ?></h3>
         <p>Tổng doanh thu (VND)</p>
@@ -42,8 +42,8 @@ require_once __DIR__ . '/includes/layout_start.php';
       <a href="<?= e(route_url('admin', 'orders')) ?>" class="small-box-footer">Xem đơn <i class="fas fa-arrow-circle-right"></i></a>
     </div>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-warning">
+  <div class="col-lg-3 col-6 animate-fade-in-up" style="animation-delay: 300ms; animation-fill-mode: forwards; opacity: 0;">
+    <div class="small-box bg-warning hover:scale-105 transition-transform duration-300 cursor-pointer">
       <div class="inner">
         <h3><?= (int)$stats['total_users'] ?></h3>
         <p>Tài khoản đăng ký</p>
@@ -52,8 +52,8 @@ require_once __DIR__ . '/includes/layout_start.php';
       <a href="<?= e(route_url('admin', 'accounts')) ?>" class="small-box-footer">Quản lý tài khoản <i class="fas fa-arrow-circle-right"></i></a>
     </div>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-danger">
+  <div class="col-lg-3 col-6 animate-fade-in-up" style="animation-delay: 400ms; animation-fill-mode: forwards; opacity: 0;">
+    <div class="small-box bg-danger hover:scale-105 transition-transform duration-300 cursor-pointer">
       <div class="inner">
         <h3><?= (int)$stats['total_products'] ?></h3>
         <p>Sản phẩm trong kho</p>
@@ -109,9 +109,9 @@ require_once __DIR__ . '/includes/layout_start.php';
   </section>
 </div> -->
 
-<div class="row">
+<div class="row animate-fade-in-up" style="animation-delay: 500ms; animation-fill-mode: forwards; opacity: 0;">
   <div class="col-12">
-    <div class="card">
+    <div class="card hover:shadow-lg transition-shadow duration-300">
       <div class="card-header">
         <h3 class="card-title">Sản phẩm bán chạy (Top 5)</h3>
       </div>
@@ -128,11 +128,14 @@ require_once __DIR__ . '/includes/layout_start.php';
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($stats['top_products'] as $p): ?>
-              <tr>
-                <td><?= e($p['name']) ?></td>
-                <td><?= (int)$p['total_qty'] ?></td>
-                <td><?= number_format((float)$p['total_revenue'], 0, ',', '.') ?> VND</td>
+            <?php foreach ($stats['top_products'] as $index => $p): ?>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td>
+                  <span class="badge badge-secondary mr-2"><?= $index + 1 ?></span>
+                  <?= e($p['name']) ?>
+                </td>
+                <td class="font-weight-bold"><?= (int)$p['total_qty'] ?></td>
+                <td class="text-success font-weight-bold"><?= number_format((float)$p['total_revenue'], 0, ',', '.') ?> VND</td>
               </tr>
             <?php endforeach; ?>
             </tbody>
